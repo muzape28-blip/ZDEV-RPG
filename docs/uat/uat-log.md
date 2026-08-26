@@ -102,3 +102,23 @@ Catatan bukti per build. Format entri:
   gunakan kanal/pola yang SUDAH terbukti hidup di device; jadikan follow
   struktural, bukan ketergantungan script.
 - **Status:** menunggu CI → UAT #3.
+
+## Entri #3 — 2026-08-26 · regresi, insiden GitHub, lapisan verifikasi lokal
+
+- **Regresi e0f93a1 diakui:** HUD mati di device (joystick/tombol hilang).
+  Target kini BUG-FIXING M0 (6 poin, WORKING-AGREEMENT §2). Belum ada
+  perubahan game-code sejak regresi (disengaja, menunggu lapisan verifikasi).
+- **Insiden GitHub Actions** (15:09–15:23+ UTC, database primary failover)
+  ⇒ CI tidak boleh jadi satu-satunya gerbang. Bukti tambahan untuk lapisan
+  verifikasi lokal.
+- **Lapisan verifikasi lokal (Langkah 0, disetujui user dgn syarat keamanan):**
+  - source tarball 4.7.2-stable (codeload.github.com, HTTPS) sha256
+    `e954996374cbd1cb5d72e0e3781cc537408e6ce73b010b12c6c2f308a820690a`;
+  - compile di `.cache/` (di luar git & snapshot), venv terpisah (scons +
+    pykg-config sebagai shim pkg-config), tanpa kredensial apa pun;
+  - flags minimal headless: x11=no wayland=no alsa=no pulseaudio=no udev=no;
+  - tujuan: parse script + boot headless SEMUA perubahan sebelum push.
+- **Riset sela (kebiasaan user):** docs resmi InputEvent (urutan pipeline
+  dikonfirmasi) + referensi locomotion blend (magnitude joystick → blend
+  walk/run; pola threshold komunitas & blend space industri). Desain
+  analog-movement dicatat di WORKING-AGREEMENT §4.
