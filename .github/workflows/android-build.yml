@@ -65,6 +65,23 @@ jobs:
             echo "export/android/shutdown_adb_on_exit = false"
           } >> "$SETTINGS"
 
+      - name: PARSE-CHECK semua GDScript (gerbang permanen)
+        run: |
+          set -e
+          for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner; do
+            echo "-- check $s"
+            "$GODOT_BIN" --headless --path . --check-only --script "res://scripts/$s.gd"
+          done
+          echo "PARSE HIJAU"
+
+      - name: BOOT-CHECK headless (gerbang permanen)
+        run: |
+          "$GODOT_BIN" --headless --path . --quit-after 30 > boot.log 2>&1 || true
+          if grep -q "SCRIPT ERROR" boot.log; then
+            echo "BOOT MERAH:"; grep -B2 -A2 "SCRIPT ERROR" boot.log; exit 1
+          fi
+          echo "BOOT HIJAU: 30 frame tanpa SCRIPT ERROR"
+
       - name: Export APK (debug, arm32)
         run: |
           mkdir -p export
