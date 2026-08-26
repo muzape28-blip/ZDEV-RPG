@@ -1,0 +1,11 @@
+# Godot
+.godot/
+export/
+*.apk
+*.aab
+
+# Tooling lokal agen (besar, tidak boleh masuk snapshot/git)
+.cache/
+
+# OS
+.DS_Store
