@@ -37,3 +37,15 @@ Catatan bukti per build. Format entri:
   resource, path script) HIJAU + review manual API GDScript.
 - **Verifikasi lokal yang TIDAK ADA:** runtime headless (sandbox memblokir
   unduhan binary Godot) — JANGAN diklaim sebagai teruji.
+
+## Entri #0.6 — 2026-08-26 · CI run pertama & bug nama templates
+
+- **Run:** #32974860643 — FAILURE di step "Install export templates".
+- **Root cause (bug agen):** URL templates menulis
+  `Godot_v${GODOT_VERSION}_stable_export_templates.tpz` ⇒ ter-render
+  `...stable_stable...` ⇒ 404. Nama resmi (diverifikasi via API release):
+  `Godot_v4.7.2-stable_export_templates.tpz`.
+- **Perbaikan:** copy docs di-commit (`3c189b8`); file workflow aktif di
+  `.github/workflows/` menunggu edit satu baris oleh user (agen tidak punya
+  permission push workflows).
+- **Pelajaran dicatat:** cek nama aset rilis via API sebelum menulis URL di CI.
