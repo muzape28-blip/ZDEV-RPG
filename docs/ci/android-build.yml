@@ -38,9 +38,14 @@ jobs:
         run: |
           cd "$RUNNER_TEMP"
           curl -fL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
-          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}"
+          # Nama folder WAJIB format titik: 4.7.2.stable (bukan hyphen).
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
           unzip -q templates.tpz
-          mv templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}/"
+          mv templates/* "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+          # Preventif: Godot butuh zipalign/apksigner dari build-tools.
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "build-tools;34.0.0" "platforms;android-34" >/dev/null 2>&1 \
+            || echo "sdkmanager tambahan gagal (mungkin sudah tersedia) — lanjut"
 
       - name: Generate debug keystore (ephemeral, tidak pernah di-commit)
         run: |

@@ -49,3 +49,16 @@ Catatan bukti per build. Format entri:
   `.github/workflows/` menunggu edit satu baris oleh user (agen tidak punya
   permission push workflows).
 - **Pelajaran dicatat:** cek nama aset rilis via API sebelum menulis URL di CI.
+
+## Entri #0.7 — 2026-08-26 · run kedua: folder templates salah nama
+
+- **Gejala (log user):** "No export template found at .../export_templates/
+  4.7.2.stable/android_debug.apk".
+- **Root cause (bug agen):** folder dibuat `4.7.2-stable` (hyphen); Godot
+  menuntut `4.7.2.stable` (titik).
+- **Perbaikan:** hardcode folder `4.7.2.stable` di workflow + satu baris
+  preventif sdkmanager (build-tools & platform 34) biar zipalign/apksigner
+  pasti ada saat export.
+- **Pelajaran dicatat:** path konvensi Godot (format versi bertitik) harus
+  diverifikasi dari pesan error/daftar path yang diharapkan, bukan diasumsikan
+  sama dengan tag rilis.
