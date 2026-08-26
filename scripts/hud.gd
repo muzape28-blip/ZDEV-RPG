@@ -19,6 +19,8 @@ var button_rects: Array[Rect2] = []
 
 var cam_drag_id := -1
 var cam_last_x := 0.0
+var cam_last_y := 0.0
+var cam_pitch := 0.0
 var _fps_acc := 0.0
 
 
