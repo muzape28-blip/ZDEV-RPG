@@ -14,7 +14,7 @@ var cam: Node = null
 
 
 func _ready() -> void:
-	cam = get_node("/root/Main/Camera3D")
+	cam = get_node_or_null("CameraPivot")
 
 
 func set_move_input(v: Vector2) -> void:

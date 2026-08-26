@@ -1,21 +1,28 @@
 extends Control
 
-# HUD kontrak M0:
-#  - dua bar TIPIS tengah-atas (boss merah di atas, player hijau-pucat di bawah)
-#  - FPS kanan-atas
-#  - floating joystick kiri, tombol glyph putih kanan-bawah
+# HUD kontrak M0 + PEMEGANG semua input layar (kanal _input = terbukti jalan
+# di device; joystick jadi buktinya). Drag kanan = orbit kamera, diputar
+# lewat pivot, BUKAN lewat _unhandled_input (kanal yang terbukti tidak
+# konsisten di export Android — r/godot gabdb9).
 const BAR_HEIGHT := 6.0
+const CAM_SENS := 0.006
 
 var player: Node = null
+var pivot: Node = null
 var fps_label: Label
 var boss_fg: ColorRect
 var player_fg: ColorRect
+var button_rects: Array[Rect2] = []
+
+var cam_drag_id := -1
+var cam_last_x := 0.0
 var _fps_acc := 0.0
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	player = get_node("/root/Main/Player")
+	player = get_node_or_null("/root/Main/Player")
+	pivot = get_node_or_null("/root/Main/Player/CameraPivot")
 
 	var vp := get_viewport().get_visible_rect().size
 	var bar_w := minf(vp.x * 0.62, 760.0)
@@ -71,8 +78,35 @@ func _make_button(slot: int) -> Control:
 	var y := vp.y - (r * 2.0 + 34.0) if slot == 0 else vp.y - (r * 2.0 + 48.0)
 	b.position = Vector2(x, y)
 	b.size = Vector2(r * 2.0, r * 2.0)
+	button_rects.append(Rect2(x - 12.0, y - 12.0, r * 2.0 + 24.0, r * 2.0 + 24.0))
 	add_child(b)
 	return b
+
+
+# ---- INPUT LAYAR: satu pintu, kanal terbukti ----
+func _input(event: InputEvent) -> void:
+	var vp_w := get_viewport().get_visible_rect().size.x
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			if _over_button(event.position):
+				return  # biar tombol yang urus
+			if cam_drag_id == -1 and event.position.x > vp_w * 0.5:
+				cam_drag_id = event.index
+				cam_last_x = event.position.x
+		elif event.index == cam_drag_id:
+			cam_drag_id = -1
+	elif event is InputEventScreenDrag and event.index == cam_drag_id:
+		var dx := event.position.x - cam_last_x
+		cam_last_x = event.position.x
+		if pivot != null:
+			pivot.rotation.y -= dx * CAM_SENS
+
+
+func _over_button(p: Vector2) -> bool:
+	for r in button_rects:
+		if r.has_point(p):
+			return true
+	return false
 
 
 func _on_move(v: Vector2) -> void:

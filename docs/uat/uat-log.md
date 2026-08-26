@@ -80,3 +80,25 @@ Catatan bukti per build. Format entri:
   - Guard respawn jika y < -30 (anti-void permanen).
 - **Status:** menunggu rebuild CI → UAT #2 (test: jalan, dodge, drag kamera,
   angka FPS menit-1 & menit-5).
+
+## Entri #2 — 2026-08-26 · UAT #2: kamera mati total; redesign struktural
+
+- **Laporan user:** ground & tombol & joystick HIDUP; kamera diam total
+  (tidak follow, tidak merespons drag).
+- **Analisis kanal:** joystick (_input) & tombol (_gui_input) terbukti jalan;
+  satu-satunya kanal tak terbukti = `_unhandled_input` (drag kamera) dan
+  script kamera itu sendiri. Komunitas mengonfirmasi `_unhandled_input`
+  bisa tidak menerima touch di export bila ada UI fullscreen
+  (r/godot gabdb9).
+- **Redesign (referensi: bugnet.io "Fix Camera3D Not Following Player"):**
+  1. Follow jadi STRUKTURAL: CameraPivot child of Player → kamera nempel
+     lewat scene tree; bahkan jika script mati, follow tetap jalan
+     (rotasi statis di tscn sebagai fallback framing).
+  2. Orbit drag dipindah ke `hud.gd::_input` (kanal terbukti), dengan
+     pengecualian rect tombol.
+  3. Player baca yaw dari pivot; fallback yaw=0 bila script pivot mati.
+  4. Debug label dihapus (kebijakan user: tanpa scaffolding support).
+- **Pelajaran dicatat:** di platform yang tidak bisa di-debug langsung,
+  gunakan kanal/pola yang SUDAH terbukti hidup di device; jadikan follow
+  struktural, bukan ketergantungan script.
+- **Status:** menunggu CI → UAT #3.
