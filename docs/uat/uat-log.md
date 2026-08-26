@@ -122,3 +122,22 @@ Catatan bukti per build. Format entri:
   dikonfirmasi) + referensi locomotion blend (magnitude joystick → blend
   walk/run; pola threshold komunitas & blend space industri). Desain
   analog-movement dicatat di WORKING-AGREEMENT §4.
+
+## Entri #4 — 2026-08-26 · MISTERI TERPECAHKAN + lapisan verifikasi lahir
+
+- **Root cause regresi e0f93a1:** `hud.gd:99` — `var dx := event.position.x`
+  dengan `event: InputEvent` (kelas dasar tanpa `.position`) ⇒ **Parse Error
+  di runtime device** ⇒ seluruh HUD (dibangun via kode) mati ⇒ joystick,
+  tombol, dan drag kamera lenyap. Follow struktural kamera TIDAK rusak —
+  sosis hanya tak bisa bergerak tanpa joystick.
+- **Kenapa CI/export lolos:** export Godot **tidak meng-compile GDScript**;
+  kompilasi terjadi saat runtime di device. Blind spot ini kini ditutup.
+- **Lapisan verifikasi lokal LAHIR:** Godot 4.7.2-stable di-compile headless
+  di sandbox (sha source tercatat di entri #3) → `tools/verify-local.sh`:
+  parse semua script + boot 40 frame. Hasil pasca-fix: **7/7 parse OK,
+  boot OK**.
+- **Fix minimal (1 baris):** cast eksplisit `event as InputEventScreenDrag`.
+  Rollback tidak diperlukan — desain drag-di-hud terbukti valid.
+- **Aturan permanen:** verify-local WAJIB hijau sebelum push; step serupa
+  akan ditambahkan ke CI pada paste workflow berikutnya.
+- **Status:** menunggu Actions pulih (insiden GH) → APK → UAT #4 device.

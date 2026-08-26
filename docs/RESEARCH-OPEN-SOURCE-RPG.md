@@ -90,3 +90,23 @@ Sumber: thread komunitas (r/OpenMW, forum.openmw.org)
   tulis ulang sendiri; aset CC = cek per-aset.
 - Analogi: MIT = resep boleh difotokopi asal cantumkan nama; GPL = restoran
   boleh dicicipi & dimasak ulang di rumah, tapi pancinya nggak boleh dibawa.
+
+---
+
+## 🧍 PIPELINE KARAKTER RESMI — FASE 2 (dikunci 2026-08-26)
+
+Kombinasi juara: full-gratis, full-legal, minim akun, anti-ketergantungan
+pada satu vendor (Mixamo = legacy tak terurus).
+
+| Tahap | Tool | Lisensi | Akses |
+|---|---|---|---|
+| Badan manusia realistis | **MakeHuman** (parametrik) | CC0 utk export resmi | ⚠️ desktop — nunggu PC user |
+| Rig otomatis | **Cinevva Auto Rigger** (browser) | gratis | ✅ HP bisa |
+| Animasi (idle/jalan/lari/serang/dodge) | **Quaternius UAL 1+2** | **CC0**, retarget-able ke Godot | ✅ tanpa akun |
+| Animasi spesial custom | Cinevva Prompt Animations | gratis | ✅ browser |
+| Cadangan animasi spesifik | Mixamo | royalty-free komersial | ⚠️ Adobe ID, legacy |
+
+Budget device tetap: ±10-15k tris, tekstur 1-2K (kontrak M0).
+**Merah / jangan dulu:** CMU mocap (flag lisensi komersial), Cascadeur
+free-tier (non-komersial).
+Urutan eksekusi: setelah 6 poin M0 hijau + proxy humanoid (fase 1).

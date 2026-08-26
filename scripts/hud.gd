@@ -96,8 +96,9 @@ func _input(event: InputEvent) -> void:
 		elif event.index == cam_drag_id:
 			cam_drag_id = -1
 	elif event is InputEventScreenDrag and event.index == cam_drag_id:
-		var dx := event.position.x - cam_last_x
-		cam_last_x = event.position.x
+		var drag := event as InputEventScreenDrag
+		var dx := drag.position.x - cam_last_x
+		cam_last_x = drag.position.x
 		if pivot != null:
 			pivot.rotation.y -= dx * CAM_SENS
 
