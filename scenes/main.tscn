@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
@@ -43,6 +43,9 @@ material = SubResource("StandardMaterial3D_body")
 radius = 0.4
 height = 1.6
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(400, 2, 400)
+
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
 
@@ -55,8 +58,14 @@ light_color = Color(1.0, 0.72, 0.45, 1)
 light_energy = 1.1
 shadow_enabled = false
 
-[node name="Ground" type="MeshInstance3D" parent="."]
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="GroundVisual" type="MeshInstance3D" parent="Ground"]
 mesh = SubResource("PlaneMesh_ground")
+
+[node name="GroundCollision" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.0, 0)
+shape = SubResource("BoxShape3D_ground")
 
 [node name="ArenaSpawner" type="Node3D" parent="."]
 script = ExtResource("4_spawner")

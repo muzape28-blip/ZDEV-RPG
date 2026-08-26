@@ -10,6 +10,11 @@ extends CharacterBody3D
 var move_input := Vector2.ZERO
 var dash_timer := 0.0
 var dash_dir := Vector3(0.0, 0.0, -1.0)
+var cam: Node = null
+
+
+func _ready() -> void:
+	cam = get_node("/root/Main/Camera3D")
 
 
 func set_move_input(v: Vector2) -> void:
@@ -34,8 +39,14 @@ func request_attack() -> void:
 func _move_direction() -> Vector3:
 	if move_input.length_squared() < 0.001:
 		return Vector3.ZERO
-	# Kamera duduk di +Z menghadap -Z: layar-atas = -Z, layar-kanan = +X.
-	return Vector3(move_input.x, 0.0, move_input.y).normalized()
+	# Gerakan RELATIF kamera: joystick atas selalu menjauhi kamera,
+	# berapa pun yaw orbitnya.
+	var cyaw := 0.0
+	if cam != null and cam.has_method("get_yaw"):
+		cyaw = cam.get_yaw()
+	var fwd := Vector3(-sin(cyaw), 0.0, -cos(cyaw))
+	var right := Vector3(-fwd.z, 0.0, fwd.x)
+	return (fwd * -move_input.y + right * move_input.x).normalized()
 
 
 func _physics_process(delta: float) -> void:
@@ -56,3 +67,9 @@ func _physics_process(delta: float) -> void:
 			rotation.y = lerp_angle(rotation.y, target_yaw, 14.0 * delta)
 
 	move_and_slide()
+
+	# Guard anti-void: kalau kelak ada lubang/bug fisika, sosis respawn,
+	# bukan jatuh selamanya (pelajaran UAT #1).
+	if global_position.y < -30.0:
+		global_position = Vector3(0.0, 2.0, 0.0)
+		velocity = Vector3.ZERO

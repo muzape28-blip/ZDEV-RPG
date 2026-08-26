@@ -62,3 +62,21 @@ Catatan bukti per build. Format entri:
 - **Pelajaran dicatat:** path konvensi Godot (format versi bertitik) harus
   diverifikasi dari pesan error/daftar path yang diharapkan, bukan diasumsikan
   sama dengan tag rilis.
+
+## Entri #1 — 2026-08-26 · DEVICE VERIFIED (launch) — laporan pertama dari Infinix
+
+- **Build:** journey.apk (debug, arm32) — APK pertama yang ter-install & jalan.
+- **Temuan user:**
+  1. "Sosis nembus ke bawah" → root cause: ground hanya MeshInstance3D,
+     TIDAK ADA physics body (klasik, dikonfirmasi komunitas r/godot & forum).
+  2. Kamera tidak bisa digerakkan → M0 memang belum ada input orbit (gap desain).
+  3. "Sosis coklat" → material putih × matahari senja warm = coklat (kosmetik).
+- **Perbaikan (commit menyusul entri ini):**
+  - Ground = StaticBody3D + BoxShape3D tebal 400×2×400 (solid, bukan plane
+    satu sisi — rekomendasi komunitas anti-tunneling).
+  - Kamera: orbit yaw via drag setengah kanan layar (`_unhandled_input`,
+    tidak mencuri sentuhan tombol/joystick).
+  - Gerakan player kini RELATIF yaw kamera (joystick atas = menjauhi kamera).
+  - Guard respawn jika y < -30 (anti-void permanen).
+- **Status:** menunggu rebuild CI → UAT #2 (test: jalan, dodge, drag kamera,
+  angka FPS menit-1 & menit-5).
