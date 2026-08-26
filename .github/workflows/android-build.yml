@@ -37,7 +37,7 @@ jobs:
       - name: Install export templates (pinned)
         run: |
           cd "$RUNNER_TEMP"
-          curl -fL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_stable_export_templates.tpz"
+          curl -fL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}"
           unzip -q templates.tpz
           mv templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}/"
