@@ -151,3 +151,19 @@ Catatan bukti per build. Format entri:
 - **Infra:** binary engine tidak bertahan di snapshot ⇒ arsip
   `tools/godot-headless.xz` (18M) + auto-dekompres di verify-local.sh.
 - **Status:** menunggu CI → UAT #5 (kamera 100%: yaw + pitch).
+
+## Entri #6 — 2026-08-26 · regresi berulang di device + blackbox DIAG
+
+- **Laporan user:** gejala identik UAT#3 (HUD mati total) muncul lagi pada
+  build pitch (run 33007148743), padahal parse+boot lokal HIJAU.
+- **Hipotesis terbuka:** ada kegagalan runtime/parse khusus device yang tak
+  tertangkap desktop — KITA BUTUH BUKTI, bukan tebakan.
+- **Blackbox DIAG (main.gd):** label on-screen `DIAG hud=? anak=? pivot=?`
+  (script hud load?, jumlah child HUD terbangun, pivot ada?) — terpisah dari
+  hud.gd sehingga hidup walau hud mati. UAT #6 = baca baris ini.
+- **Infra persisten:** snapshot membuang file >~10MB ⇒ engine diarsip
+  terpecah `tools/parts/gh.*` (7M+7M+3.8M); verify-local merakit ulang
+  otomatis. Terbukti: gate bangkit dari parts, HIJAU.
+- **Gerbang CI permanen (menunggu paste user sekali):** step PARSE-CHECK +
+  BOOT-CHECK headless di docs/ci/android-build.yml — CI tidak bergantung
+  pada persistensi sandbox.

@@ -7,10 +7,15 @@
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN="$ROOT/tools/godot-headless"
-# Binary besar kadang tidak bertahan di snapshot; fallback: arsip xz.
+# Binary besar kadang tidak bertahan di snapshot; fallback: arsip xz,
+# lalu fallback kedua: parts xz terpecah (tiap part < 8MB, lolos snapshot).
 if [ ! -x "$BIN" ] && [ -f "$ROOT/tools/godot-headless.xz" ]; then
   echo "engine tidak ada — dekompres dari tools/godot-headless.xz ..."
   xz -dc "$ROOT/tools/godot-headless.xz" > "$BIN" && chmod +x "$BIN"
+fi
+if [ ! -x "$BIN" ] && ls "$ROOT"/tools/parts/gh.* >/dev/null 2>&1; then
+  echo "engine tidak ada — rakit dari tools/parts/ ..."
+  cat "$ROOT"/tools/parts/gh.* | xz -dc > "$BIN" && chmod +x "$BIN"
 fi
 [ -x "$BIN" ] || { echo "FATAL: tools/godot-headless tidak ada"; exit 2; }
 T="$ROOT/.cache/projtest"
