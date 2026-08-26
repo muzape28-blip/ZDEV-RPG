@@ -23,10 +23,16 @@ Catatan bukti per build. Format entri:
   workflow without `workflows` permission"*.
 - **Workaround:** konten workflow dipindah ke `docs/ci/android-build.yml`
   (net diff branch tidak menyentuh `.github/workflows`). Instalasi workflow
-  ke `.github/workflows/` dilakukan sekali oleh USER lewat web UI GitHub,
-  atau user memberi permission `workflows` ke app.
-- **Kondisi pelepasan workaround:** setelah workflow terpasang/permission
-  diberikan, file di `docs/ci/` boleh dipindah balik dan saya yang kelola CI.
+  ke `.github/workflows/` dilakukan SEKALI oleh USER lewat web UI GitHub.
+  (Opsi "grant permission workflows ke app" DIHAPUS 2026-08-26 — bukti user:
+  pengaturan itu tidak ada di sisi Arena maupun GitHub; konsisten 4 bulan
+  di 6 repo: ZABACODE, ZABAWHEELS, ZMUX, ZCLAW, ZCODE, ZDEV-RPG.)
+- **Prosedur pasang:** copy raw `docs/ci/android-build.yml` (link raw di chat)
+  → web UI: Add file → Create new file → nama `.github/workflows/android-build.yml`
+  → paste → commit ke branch `arena/01a03ddc-zdev-rpg`.
+- **Kondisi pelepasan workaround:** setelah workflow terpasang, file di
+  `docs/ci/` boleh dipindah balik dan saya yang kelola CI (update workflow
+  selanjutnya tetap butuh paste manual user selama permission belum ada).
 - **Verifikasi lokal yang ADA:** static guard tscn (load_steps, referensi
   resource, path script) HIJAU + review manual API GDScript.
 - **Verifikasi lokal yang TIDAK ADA:** runtime headless (sandbox memblokir
