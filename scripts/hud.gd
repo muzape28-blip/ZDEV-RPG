@@ -6,6 +6,9 @@ extends Control
 # konsisten di export Android — r/godot gabdb9).
 const BAR_HEIGHT := 6.0
 const CAM_SENS := 0.006
+const CAM_PITCH_SENS := 0.004
+const PITCH_MIN := -0.5
+const PITCH_MAX := 0.3
 
 var player: Node = null
 var pivot: Node = null
@@ -93,14 +96,21 @@ func _input(event: InputEvent) -> void:
 			if cam_drag_id == -1 and event.position.x > vp_w * 0.5:
 				cam_drag_id = event.index
 				cam_last_x = event.position.x
+				cam_last_y = event.position.y
 		elif event.index == cam_drag_id:
 			cam_drag_id = -1
 	elif event is InputEventScreenDrag and event.index == cam_drag_id:
 		var drag := event as InputEventScreenDrag
 		var dx := drag.position.x - cam_last_x
+		var dy := drag.position.y - cam_last_y
 		cam_last_x = drag.position.x
+		cam_last_y = drag.position.y
 		if pivot != null:
 			pivot.rotation.y -= dx * CAM_SENS
+			# pitch: drag vertikal, clamp aman (tidak tembus tanah / tidak
+			# top-down ekstrem). UAT #4: kamera baru 70% (yaw saja).
+			cam_pitch = clampf(cam_pitch + dy * CAM_PITCH_SENS, PITCH_MIN, PITCH_MAX)
+			pivot.rotation.x = cam_pitch
 
 
 func _over_button(p: Vector2) -> bool:

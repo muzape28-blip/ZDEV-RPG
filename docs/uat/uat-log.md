@@ -141,3 +141,13 @@ Catatan bukti per build. Format entri:
 - **Aturan permanen:** verify-local WAJIB hijau sebelum push; step serupa
   akan ditambahkan ke CI pada paste workflow berikutnya.
 - **Status:** menunggu Actions pulih (insiden GH) → APK → UAT #4 device.
+
+## Entri #5 — 2026-08-26 · M0 LULUS 6/6 + pitch kamera
+
+- **UAT #4 (user):** enam poin M0 HIJAU; kamera dinilai 70% (yaw saja).
+- **Perbaikan:** pitch kamera via drag vertikal, clamp [-0.5, 0.3] rad
+  (tidak tembus tanah / tidak top-down ekstrem), sensitivitas 0.004.
+- **Gerbang:** verify-local HIJAU (7 parse + boot 40 frame).
+- **Infra:** binary engine tidak bertahan di snapshot ⇒ arsip
+  `tools/godot-headless.xz` (18M) + auto-dekompres di verify-local.sh.
+- **Status:** menunggu CI → UAT #5 (kamera 100%: yaw + pitch).
