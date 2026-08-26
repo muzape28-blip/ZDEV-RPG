@@ -78,6 +78,11 @@ spec kecil → implementasi kecil → tes editor → export APK arm32
 - **Bonus alur kerja:** artifact APK bisa lu install di Infinix langsung dari halaman GitHub — tanpa perlu PC build.
 - Referensi pola teruji: game-ci *Build Godot Action* (Android SDK/NDK/JDK + cache templates) dan *godot-ci-android-export* (APK/AAB + debug keystore).
 - Yang CI **tidak** bisa: menyentuh Infinix lu. Pembagian jujur — CI = compile/build/unit test (level CI VERIFIED), lu = rasa + FPS di device (level DEVICE VERIFIED).
+- **Status instalasi CI (2026-08-26):** credential platform tidak punya permission
+  `workflows` ⇒ push `.github/workflows/*` ditolak GitHub. Konten workflow hidup di
+  `docs/ci/android-build.yml`; pemasangan sekali ke `.github/workflows/` dilakukan
+  user (web UI) atau lewat pemberian permission. Terlacak di `docs/uat/uat-log.md`
+  entri #0.5 beserta kondisi pelepasannya.
 
 ---
 
