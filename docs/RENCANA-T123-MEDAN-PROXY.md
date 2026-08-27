@@ -65,7 +65,13 @@ fix lokal ter-gerbang → push → UAT ronde 2 (hanya bila perlu)
 
 **NON-GOALS fase ini:** interaksi rumput-karakter, wind trails, foot-IK
 berjalan di lereng curam, rambut mesh, opsi joystick fixed (antri nanti),
-semua hal combat M1.
+semua hal combat M1, **menu settings gear+panel** (ganti chip debug di
+fase polish).
+
+**UI TOGGLE (sementara, debug):** dua chip kiri-atas di bawah DIAG —
+`[BAY:ON/OFF]` & `[RPT:OFF/JRG/SDG]`, tap = siklus, target sentuh ≥44 px,
+glyph/teks polos. Zona kiri-atas = zona mati jempol: tak kepencet saat
+main, mudah ditunjuk saat UAT. Bukan bagian dari kontrak HUD pemain.
 
 ## 3. FILE PASTI & KEMUNGKINAN DISENTUH + PENANGANAN
 
