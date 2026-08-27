@@ -111,24 +111,28 @@ func _build() -> void:
 
 func _physics_process(dt: float) -> void:
 	time_acc += dt
-	var p := get_parent()
+	var p: Node = get_parent()
 	if p == null:
 		return
-	var speed := Vector2(p.velocity.x, p.velocity.z).length()
-	var ratio := clampf(speed / 5.5, 0.0, 1.0)
-	var moving := speed > 0.15
-	var dashing := p.get("dash_timer") != null and p.dash_timer > 0.0
+	var vel: Vector3 = p.velocity
+	var speed: float = Vector2(vel.x, vel.z).length()
+	var ratio: float = clampf(speed / 5.5, 0.0, 1.0)
+	var moving: bool = speed > 0.15
+	var dash_raw: Variant = p.get("dash_timer")
+	var dashing: bool = false
+	if dash_raw != null:
+		dashing = float(dash_raw) > 0.0
 
 	# fase terkunci kecepatan (stride lerp jalan->lari)
 	if moving:
-		var stride := lerp(0.7, 1.2, ratio)
+		var stride: float = lerp(0.7, 1.2, ratio)
 		phase += (speed / stride) * dt * TAU
-	var amp_t := (0.5 + 0.45 * ratio) if moving else 0.0
+	var amp_t: float = (0.5 + 0.45 * ratio) if moving else 0.0
 	amp_cur = lerp(amp_cur, amp_t, 10.0 * dt)
 
-	var idle_f := clampf(1.0 - speed / 1.0, 0.0, 1.0)
-	var sw_l := sin(phase) * amp_cur
-	var sw_r := sin(phase + PI) * amp_cur
+	var idle_f: float = clampf(1.0 - speed / 1.0, 0.0, 1.0)
+	var sw_l: float = sin(phase) * amp_cur
+	var sw_r: float = sin(phase + PI) * amp_cur
 
 	# kaki
 	leg_l.rotation.x = sw_l
@@ -138,8 +142,7 @@ func _physics_process(dt: float) -> void:
 
 	# lengan: ayun berlawanan kaki, blend ke stance saat idle
 	var swing_l := sw_r * 0.6
-	var swing_r := sw_l * 0.6
-	arm_l.rotation.x = lerp(swing_l, -0.25, idle_f)
+	var swing_r := sw_l * 0.6	arm_l.rotation.x = lerp(swing_l, -0.25, idle_f)
 	arm_r.rotation.x = lerp(swing_r, -0.5, idle_f)
 	fore_l.rotation.x = -0.35 - 0.3 * idle_f
 	fore_r.rotation.x = -0.35 - 0.45 * idle_f
@@ -152,7 +155,7 @@ func _physics_process(dt: float) -> void:
 	var pt_t := -(0.25 + 0.75 * ratio)
 	for i in 3:
 		var seg: Node3D = pony[i]
-		var target := pt_t * (0.5 + 0.3 * float(i)) + sin(phase * 0.5 + float(i)) * 0.08 * ratio
+		var target: float = pt_t * (0.5 + 0.3 * float(i)) + sin(phase * 0.5 + float(i)) * 0.08 * ratio
 		seg.rotation.x = lerp(seg.rotation.x, target, 6.0 * dt)
 
 	# pose dodge slide (S3)
@@ -170,14 +173,14 @@ func _physics_process(dt: float) -> void:
 	# konform tanah (S3): pitch/roll halus + shift tinggi lokal
 	var ter := get_node_or_null("/root/Main/Terrain")
 	if ter != null and ter.has_method("get_height_at"):
-		var g := p.global_position
-		var fwd := -p.global_transform.basis.z
+		var g: Vector3 = p.global_position
+		var fwd: Vector3 = -p.global_transform.basis.z
 		fwd.y = 0.0
 		if fwd.length_squared() > 0.01:
 			fwd = fwd.normalized()
 		else:
 			fwd = Vector3(0.0, 0.0, -1.0)
-		var right := Vector3(-fwd.z, 0.0, fwd.x)
+		var right: Vector3 = Vector3(-fwd.z, 0.0, fwd.x)
 		var h_c: float = ter.get_height_at(g.x, g.z)
 		var h_f: float = ter.get_height_at(g.x + fwd.x * 0.6, g.z + fwd.z * 0.6)
 		var h_r: float = ter.get_height_at(g.x + right.x * 0.6, g.z + right.z * 0.6)

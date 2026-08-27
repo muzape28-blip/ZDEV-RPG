@@ -39,7 +39,7 @@ func rebuild(d: int) -> void:
 	var count := BASE_COUNT * (1 if d == 1 else 2)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.color_format = MultiMesh.COLOR_8BIT
+	mm.use_colors = true
 	mm.instance_count = count
 	mm.mesh = _card_mesh()
 	var rng := RandomNumberGenerator.new()
@@ -82,15 +82,16 @@ func _card_mesh() -> ArrayMesh:
 	var uvs := PackedVector2Array()
 	var idx := PackedInt32Array()
 	var w := 0.28
-	for q in [0.0, PI * 0.5]:
-		var ca := cos(q)
-		var sa := sin(q)
+	var quats: Array = [0.0, PI * 0.5]
+	for q in quats:
+		var ca: float = cos(q)
+		var sa: float = sin(q)
 		var base := verts.size()
-		var corners := [-w, w, w, -w]
-		var ys := [0.0, 0.0, 1.0, 1.0]
-		var uv := [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]
+		var corners: Array = [-w, w, w, -w]
+		var ys: Array = [0.0, 0.0, 1.0, 1.0]
+		var uv: Array = [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]
 		for i in 4:
-			var lx := corners[i]
+			var lx: float = corners[i]
 			verts.append(Vector3(lx * ca, ys[i], -lx * sa))
 			nrms.append(Vector3(sa, 0.0, ca))
 			uvs.append(uv[i])

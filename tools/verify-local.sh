@@ -30,7 +30,7 @@ for s in main player_controller camera_follow hud floating_joystick ui_button ar
   OUT=$(timeout 60 "$BIN" --headless --check-only --script "res://scripts/$s.gd" 2>&1 | grep -E "SCRIPT ERROR|Parse Error" | head -2)
   if [ -n "$OUT" ]; then echo "PARSE GAGAL: $s"; echo "$OUT"; FAIL=1; else echo "parse OK: $s"; fi
 done
-BOOT=$(timeout 120 "$BIN" --headless --quit-after 40 2>&1 | grep -E "SCRIPT ERROR" | head -5)
+BOOT=$(timeout 120 "$BIN" --headless --quit-after 40 2>&1 | grep -E "SCRIPT ERROR|Parse Error|treated as error" | head -5)
 if [ -n "$BOOT" ]; then echo "BOOT GAGAL:"; echo "$BOOT"; FAIL=1; else echo "boot OK: 40 frame tanpa SCRIPT ERROR"; fi
 [ "$FAIL" = "0" ] && echo "VERIFIKASI LOKAL: HIJAU" || echo "VERIFIKASI LOKAL: MERAH"
 exit "$FAIL"
