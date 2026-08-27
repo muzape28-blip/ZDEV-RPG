@@ -141,8 +141,9 @@ func _physics_process(dt: float) -> void:
 	shin_r.rotation.x = clampf((1.0 - sin(phase + PI)) * 0.5, 0.0, 1.0) * amp_cur * 0.8 + 0.05
 
 	# lengan: ayun berlawanan kaki, blend ke stance saat idle
-	var swing_l := sw_r * 0.6
-	var swing_r := sw_l * 0.6	arm_l.rotation.x = lerp(swing_l, -0.25, idle_f)
+	var swing_l: float = sw_r * 0.6
+	var swing_r: float = sw_l * 0.6
+	arm_l.rotation.x = lerp(swing_l, -0.25, idle_f)
 	arm_r.rotation.x = lerp(swing_r, -0.5, idle_f)
 	fore_l.rotation.x = -0.35 - 0.3 * idle_f
 	fore_r.rotation.x = -0.35 - 0.45 * idle_f
