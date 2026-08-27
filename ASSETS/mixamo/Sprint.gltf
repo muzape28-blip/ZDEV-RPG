@@ -1,0 +1,476 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "ZDEV-RPG Character Generator"
+  },
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0,
+        1
+      ]
+    }
+  ],
+  "scene": 0,
+  "nodes": [
+    {
+      "name": "FemaleWarriorMesh",
+      "mesh": 0,
+      "skin": 0
+    },
+    {
+      "name": "Hips",
+      "translation": [
+        0.0,
+        0.95,
+        0.0
+      ],
+      "children": [
+        2,
+        5,
+        8
+      ]
+    },
+    {
+      "name": "Spine",
+      "translation": [
+        0.0,
+        0.25,
+        0.0
+      ],
+      "children": [
+        3
+      ]
+    },
+    {
+      "name": "Chest",
+      "translation": [
+        0.0,
+        0.25,
+        0.0
+      ],
+      "children": [
+        4,
+        11,
+        13
+      ]
+    },
+    {
+      "name": "Head",
+      "translation": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "children": [
+        15
+      ]
+    },
+    {
+      "name": "UpperLeg_L",
+      "translation": [
+        -0.15,
+        0.0,
+        0.0
+      ],
+      "children": [
+        6
+      ]
+    },
+    {
+      "name": "LowerLeg_L",
+      "translation": [
+        0.0,
+        -0.4,
+        0.0
+      ],
+      "children": [
+        7
+      ]
+    },
+    {
+      "name": "Foot_L",
+      "translation": [
+        0.0,
+        -0.4,
+        0.0
+      ]
+    },
+    {
+      "name": "UpperLeg_R",
+      "translation": [
+        0.15,
+        0.0,
+        0.0
+      ],
+      "children": [
+        9
+      ]
+    },
+    {
+      "name": "LowerLeg_R",
+      "translation": [
+        0.0,
+        -0.4,
+        0.0
+      ],
+      "children": [
+        10
+      ]
+    },
+    {
+      "name": "Foot_R",
+      "translation": [
+        0.0,
+        -0.4,
+        0.0
+      ]
+    },
+    {
+      "name": "UpperArm_L",
+      "translation": [
+        -0.3,
+        0.0,
+        0.0
+      ],
+      "children": [
+        12
+      ]
+    },
+    {
+      "name": "LowerArm_L",
+      "translation": [
+        -0.2,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "UpperArm_R",
+      "translation": [
+        0.3,
+        0.0,
+        0.0
+      ],
+      "children": [
+        14
+      ]
+    },
+    {
+      "name": "LowerArm_R",
+      "translation": [
+        0.2,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Hair",
+      "translation": [
+        0.0,
+        -0.1,
+        -0.15
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "WarriorMaterial",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.8,
+          0.4,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.4,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "FemaleWarriorMesh",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2,
+            "JOINTS_0": 3,
+            "WEIGHTS_0": 4
+          },
+          "indices": 5,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "skins": [
+    {
+      "name": "Armature",
+      "inverseBindMatrices": 6,
+      "joints": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  ],
+  "animations": [
+    {
+      "name": "Sprint",
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 5,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 1,
+          "target": {
+            "node": 8,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 2,
+          "target": {
+            "node": 11,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 3,
+          "target": {
+            "node": 13,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 2,
+            "path": "rotation"
+          }
+        }
+      ],
+      "samplers": [
+        {
+          "input": 7,
+          "output": 8,
+          "interpolation": "LINEAR"
+        },
+        {
+          "input": 9,
+          "output": 10,
+          "interpolation": "LINEAR"
+        },
+        {
+          "input": 11,
+          "output": 12,
+          "interpolation": "LINEAR"
+        },
+        {
+          "input": 13,
+          "output": 14,
+          "interpolation": "LINEAR"
+        },
+        {
+          "input": 15,
+          "output": 16,
+          "interpolation": "LINEAR"
+        }
+      ]
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 360,
+      "type": "VEC3",
+      "min": [
+        -0.62,
+        0.0,
+        -0.3
+      ],
+      "max": [
+        0.62,
+        1.78,
+        0.11
+      ]
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 4320,
+      "componentType": 5126,
+      "count": 360,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 8640,
+      "componentType": 5126,
+      "count": 360,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 11520,
+      "componentType": 5123,
+      "count": 360,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 14400,
+      "componentType": 5126,
+      "count": 360,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 20160,
+      "componentType": 5125,
+      "count": 540,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 22320,
+      "componentType": 5126,
+      "count": 15,
+      "type": "MAT4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 23280,
+      "componentType": 5126,
+      "count": 18,
+      "type": "SCALAR",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.5666666666666667
+      ]
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 23352,
+      "componentType": 5126,
+      "count": 18,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 23640,
+      "componentType": 5126,
+      "count": 18,
+      "type": "SCALAR",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.5666666666666667
+      ]
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 23712,
+      "componentType": 5126,
+      "count": 18,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 24000,
+      "componentType": 5126,
+      "count": 18,
+      "type": "SCALAR",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.5666666666666667
+      ]
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 24072,
+      "componentType": 5126,
+      "count": 18,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 24360,
+      "componentType": 5126,
+      "count": 18,
+      "type": "SCALAR",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.5666666666666667
+      ]
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 24432,
+      "componentType": 5126,
+      "count": 18,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 24720,
+      "componentType": 5126,
+      "count": 18,
+      "type": "SCALAR",
+      "min": [
+        0.0
+      ],
+      "max": [
+        0.5666666666666667
+      ]
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 24792,
+      "componentType": 5126,
+      "count": 18,
+      "type": "VEC4"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 25080
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "Sprint.bin",
+      "byteLength": 25080
+    }
+  ]
+}
