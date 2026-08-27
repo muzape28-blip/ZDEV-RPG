@@ -79,7 +79,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 script = ExtResource("3_cam")
 
 [node name="Camera3D" type="Camera3D" parent="Player/CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 0.91, -0.414, 0, 0.414, 0.91, 0, 4.6, 6.8)
+transform = Transform3D(1, 0, 0, 0, 0.91, -0.414, 0, 0.414, 0.91, 0, 4.45, 7.0)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

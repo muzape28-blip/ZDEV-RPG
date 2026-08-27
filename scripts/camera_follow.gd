@@ -19,4 +19,4 @@ func _physics_process(_delta: float) -> void:
 		return
 	var cam := get_node_or_null("Camera3D")
 	if cam is Camera3D:
-		cam.look_at(target.global_position + Vector3(0.0, 1.5, 0.0), Vector3.UP)
+		cam.look_at(target.global_position + Vector3(0.0, 1.55, 0.0), Vector3.UP)
