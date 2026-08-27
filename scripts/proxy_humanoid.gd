@@ -41,8 +41,8 @@ var mat_hair: StandardMaterial3D
 
 
 func _ready() -> void:
-	mat_cloth = _mat(Color(0.35, 0.38, 0.45))
-	mat_cloth_dark = _mat(Color(0.22, 0.24, 0.3))
+	mat_cloth = _mat(Color(0.48, 0.53, 0.64))  # lebih terang: readability senja
+	mat_cloth_dark = _mat(Color(0.3, 0.33, 0.4))
 	mat_skin = _mat(Color(0.72, 0.55, 0.42))
 	mat_hair = _mat(Color(0.12, 0.1, 0.09))
 	_build()

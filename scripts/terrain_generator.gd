@@ -103,6 +103,7 @@ func _build_terrain() -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = am
 	mi.material_override = mat
+	mi.cast_shadow = 0  # OFF: tanah menerima bayangan saja, tak casting (hemat)
 	add_child(mi)
 
 	# collision terrain: HeightMapShape3D (tool resmi — concave trimesh

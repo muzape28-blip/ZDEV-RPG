@@ -70,6 +70,7 @@ func _spawn_pebbles(rng: RandomNumberGenerator) -> void:
 		placed += 1
 	var mi := MultiMeshInstance3D.new()
 	mi.multimesh = mm
+	mi.cast_shadow = 0  # kerikil terlalu kecil untuk layak dapat bayangan
 	add_child(mi)
 
 

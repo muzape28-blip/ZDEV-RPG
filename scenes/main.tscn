@@ -40,7 +40,7 @@ rotation = Vector3(-1.0, 0.0, 0.6)
 light_color = Color(1.0, 0.72, 0.45, 1)
 light_energy = 1.1
 shadow_enabled = true
-directional_shadow_max_distance = 60.0
+directional_shadow_max_distance = 40.0
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("6_ter")
@@ -66,7 +66,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 script = ExtResource("3_cam")
 
 [node name="Camera3D" type="Camera3D" parent="Player/CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 0.91, -0.414, 0, 0.414, 0.91, 0, 3.9, 6.2)
+transform = Transform3D(1, 0, 0, 0, 0.91, -0.414, 0, 0.414, 0.91, 0, 3.6, 5.6)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
