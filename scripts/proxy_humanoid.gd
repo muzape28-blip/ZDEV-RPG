@@ -69,6 +69,8 @@ func _physics_process(dt: float) -> void:
 		target_anim = "Walking"
 
 	if anim_player != null:
+		# stride match: playback ikut kecepatan biar kaki nggak seluncur
+		anim_player.speed_scale = clampf(lerp(0.9, 1.35, ratio), 0.5, 1.6)
 		if anim_player.has_animation(target_anim):
 			if current_anim != target_anim:
 				current_anim = target_anim
