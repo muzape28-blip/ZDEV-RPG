@@ -1,62 +1,148 @@
 extends Node3D
 
-# Sabana graybox: pohon mati + batu, posisi deterministik (seed tetap)
-# supaya hasil konsisten antar build & antar sesi UAT.
-@export var tree_count := 10
-@export var rock_count := 8
+# S1 — komposisi batuan sabana (pohon DIHAPUS): landmark, bukan clutter.
+# 3 klaster sedang (15-25 m) + 3 batu besar (35-60 m) + ±15 kerikil
+# (dilarang r<10 m) + 1 monolit reruntuhan ±80 m.
+# MultiMesh per kelas = 3 draw call; collision hanya besar+sedang.
 @export var seed_value := 7
+
+const CLUSTER_ANGLES := [40.0, 160.0, 280.0]
+const BIG_ANGLES := [90.0, 210.0, 330.0]
+
+var rock_mat: StandardMaterial3D = null
 
 
 func _ready() -> void:
+	rock_mat = StandardMaterial3D.new()
+	rock_mat.albedo_color = Color(0.16, 0.15, 0.14)
+	rock_mat.roughness = 1.0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
+	_spawn_pebbles(rng)
+	_spawn_clusters(rng)
+	_spawn_big_rocks(rng)
+	_spawn_monolith()
 
-	var bark := StandardMaterial3D.new()
-	bark.albedo_color = Color(0.13, 0.10, 0.08)
-	bark.roughness = 1.0
 
-	var trunk := CylinderMesh.new()
-	trunk.top_radius = 0.06
-	trunk.bottom_radius = 0.14
-	trunk.height = 2.4
-	trunk.material = bark
+func _rock_mesh() -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radial_segments = 6
+	m.rings = 4
+	m.material = rock_mat
+	return m
 
-	var branch := CylinderMesh.new()
-	branch.top_radius = 0.02
-	branch.bottom_radius = 0.05
-	branch.height = 1.1
-	branch.material = bark
 
-	var rock_mat := StandardMaterial3D.new()
-	rock_mat.albedo_color = Color(0.22, 0.20, 0.18)
-	rock_mat.roughness = 1.0
+func _h(x: float, z: float) -> float:
+	var ter := get_node_or_null("/root/Main/Terrain")
+	if ter != null and ter.has_method("get_height_at"):
+		return ter.get_height_at(x, z)
+	return 0.0
 
-	for i in tree_count:
-		var pos := _ring_position(rng, 14.0, 70.0)
-		var t := MeshInstance3D.new()
-		t.mesh = trunk
-		t.position = pos + Vector3(0.0, 1.2, 0.0)
-		t.rotation.y = rng.randf_range(0.0, TAU)
-		add_child(t)
-		var b := MeshInstance3D.new()
-		b.mesh = branch
-		b.position = pos + Vector3(0.0, 1.9, 0.0)
-		b.rotation = Vector3(rng.randf_range(-0.9, 0.9), 0.0, rng.randf_range(-0.9, 0.9))
+
+func _pos(angle_deg: float, radius: float, rng: RandomNumberGenerator) -> Vector3:
+	var a := deg_to_rad(angle_deg) + rng.randf_range(-0.2, 0.2)
+	var r := radius + rng.randf_range(-3.0, 3.0)
+	var x := cos(a) * r
+	var z := sin(a) * r
+	return Vector3(x, _h(x, z), z)
+
+
+func _spawn_pebbles(rng: RandomNumberGenerator) -> void:
+	var count := 15
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.instance_count = count
+	mm.mesh = _rock_mesh()
+	var placed := 0
+	var guard := 0
+	while placed < count and guard < 200:
+		guard += 1
+		var a := rng.randf_range(0.0, TAU)
+		var r := rng.randf_range(10.0, 45.0)  # dilarang r<10
+		var x := cos(a) * r
+		var z := sin(a) * r
+		var s := rng.randf_range(0.15, 0.4)
+		var t := Transform3D()
+		t.basis = t.basis.rotated(Vector3.UP, rng.randf_range(0.0, TAU))
+		t.basis = t.basis.scaled(Vector3(s, s * rng.randf_range(0.6, 1.0), s))
+		t.origin = Vector3(x, _h(x, z) + s * 0.3, z)
+		mm.set_instance_transform(placed, t)
+		placed += 1
+	var mi := MultiMeshInstance3D.new()
+	mi.multimesh = mm
+	add_child(mi)
+
+
+func _spawn_clusters(rng: RandomNumberGenerator) -> void:
+	var mesh := _rock_mesh()
+	for ang in CLUSTER_ANGLES:
+		var c := _pos(ang, rng.randf_range(15.0, 25.0), rng)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.instance_count = 6
+		mm.mesh = mesh
+		for i in 6:
+			var off := Vector3(rng.randf_range(-1.6, 1.6), 0.0, rng.randf_range(-1.6, 1.6))
+			var s := rng.randf_range(0.4, 0.9)
+			var t := Transform3D()
+			t.basis = t.basis.rotated(Vector3.UP, rng.randf_range(0.0, TAU))
+			t.basis = t.basis.scaled(Vector3(s, s * rng.randf_range(0.7, 1.1), s))
+			t.origin = c + off + Vector3(0.0, s * 0.35 + _h(c.x + off.x, c.z + off.z) - _h(c.x, c.z), 0.0)
+			mm.set_instance_transform(i, t)
+		var mi := MultiMeshInstance3D.new()
+		mi.multimesh = mm
+		add_child(mi)
+		# collision sederhana: 2 kotak per klaster
+		for k in 2:
+			var b := StaticBody3D.new()
+			var sh := CollisionShape3D.new()
+			var box := BoxShape3D.new()
+			box.size = Vector3(2.2, 1.0, 1.6)
+			sh.shape = box
+			sh.rotation.y = rng.randf_range(0.0, TAU)
+			b.add_child(sh)
+			b.position = c + Vector3(rng.randf_range(-0.8, 0.8), 0.4, rng.randf_range(-0.8, 0.8))
+			add_child(b)
+
+
+func _spawn_big_rocks(rng: RandomNumberGenerator) -> void:
+	var mesh := _rock_mesh()
+	for ang in BIG_ANGLES:
+		var p := _pos(ang, rng.randf_range(35.0, 60.0), rng)
+		var s := rng.randf_range(1.5, 2.5)
+		var mi := MeshInstance3D.new()
+		mi.mesh = mesh
+		mi.scale = Vector3(s, s * rng.randf_range(0.8, 1.2), s)
+		mi.rotation.y = rng.randf_range(0.0, TAU)
+		mi.position = p + Vector3(0.0, s * 0.35, 0.0)
+		add_child(mi)
+		var b := StaticBody3D.new()
+		var sh := CollisionShape3D.new()
+		var sp := SphereShape3D.new()
+		sp.radius = s * 0.8
+		sh.shape = sp
+		b.add_child(sh)
+		b.position = p + Vector3(0.0, s * 0.4, 0.0)
 		add_child(b)
 
-	for i in rock_count:
-		var pos := _ring_position(rng, 10.0, 60.0)
-		var r := MeshInstance3D.new()
-		var m := BoxMesh.new()
-		m.size = Vector3(rng.randf_range(0.5, 1.4), rng.randf_range(0.3, 0.8), rng.randf_range(0.5, 1.4))
-		m.material = rock_mat
-		r.mesh = m
-		r.position = pos + Vector3(0.0, m.size.y / 2.0, 0.0)
-		r.rotation.y = rng.randf_range(0.0, TAU)
-		add_child(r)
 
-
-func _ring_position(rng: RandomNumberGenerator, r_min: float, r_max: float) -> Vector3:
-	var angle := rng.randf_range(0.0, TAU)
-	var radius := rng.randf_range(r_min, r_max)
-	return Vector3(cos(angle) * radius, 0.0, sin(angle) * radius)
+func _spawn_monolith() -> void:
+	# landmark senja ±80 m: balok runtuh + puncak miring
+	var m := BoxMesh.new()
+	m.size = Vector3(1.4, 7.0, 0.9)
+	m.material = rock_mat
+	var mi := MeshInstance3D.new()
+	mi.mesh = m
+	var x := 80.0
+	var z := 4.0
+	mi.position = Vector3(x, _h(x, z) + 3.2, z)
+	mi.rotation = Vector3(0.06, 0.4, 0.04)
+	add_child(mi)
+	var m2 := BoxMesh.new()
+	m2.size = Vector3(1.1, 2.2, 0.8)
+	m2.material = rock_mat
+	var mi2 := MeshInstance3D.new()
+	mi2.mesh = m2
+	mi2.position = Vector3(x + 0.8, _h(x, z) + 6.6, z + 0.3)
+	mi2.rotation = Vector3(0.3, 0.4, 0.5)
+	add_child(mi2)
