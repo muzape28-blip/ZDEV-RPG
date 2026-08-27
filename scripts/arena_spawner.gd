@@ -22,6 +22,7 @@ func _ready() -> void:
 	_spawn_clusters(rng)
 	_spawn_big_rocks(rng)
 	_spawn_monolith()
+	_spawn_trees(rng)
 
 
 func _rock_mesh() -> SphereMesh:
@@ -125,6 +126,34 @@ func _spawn_big_rocks(rng: RandomNumberGenerator) -> void:
 		b.add_child(sh)
 		b.position = p + Vector3(0.0, s * 0.4, 0.0)
 		add_child(b)
+
+
+func _spawn_trees(rng: RandomNumberGenerator) -> void:
+	# pohon low-poly Pizza Doggy (Royalty Free) — nearest filtering sesuai
+	# catatan kreator; sebar di luar arena combat
+	var paths: Array = [
+		"res://ASSETS/trees/dead_tree_rt_1.glb",
+		"res://ASSETS/trees/dead_tree_rt_2.glb",
+		"res://ASSETS/trees/small_tree_rt_1.glb",
+	]
+	var scenes: Array = []
+	for p in paths:
+		if ResourceLoader.exists(p):
+			scenes.append(load(p))
+	if scenes.is_empty():
+		return
+	for i in 12:
+		var sc: PackedScene = scenes[i % scenes.size()]
+		var inst := sc.instantiate()
+		var a := rng.randf_range(0.0, TAU)
+		var r := rng.randf_range(18.0, 60.0)
+		var x := cos(a) * r
+		var z := sin(a) * r
+		inst.position = Vector3(x, _h(x, z), z)
+		inst.rotation.y = rng.randf_range(0.0, TAU)
+		var s := rng.randf_range(0.8, 1.4)
+		inst.scale = Vector3(s, s, s)
+		add_child(inst)
 
 
 func _spawn_monolith() -> void:

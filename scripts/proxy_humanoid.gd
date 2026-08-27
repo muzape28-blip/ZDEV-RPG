@@ -13,32 +13,62 @@ func _ready() -> void:
 	_load_and_setup_character()
 
 
-func _load_and_setup_character() -> void:
-	# Coba muat model GLTF yang telah disiapkan di ASSETS/mixamo/
-	var paths := [
-		"res://ASSETS/mixamo/sample_female_warrior.gltf",
-		"res://ASSETS/mixamo/Idle.gltf"
-	]
+# Prioritas karakter: Arissa (Mixamo, HP user) > sintetis Jules (glTF).
+# Animasi tambahan dijahit dari FBX Mixamo rig sama (path tulang identik).
+const CHAR_PATHS: Array = [
+	"res://ASSETS/ARRISA/Standing Idle 02.fbx",
+	"res://ASSETS/mixamo/sample_female_warrior.gltf",
+	"res://ASSETS/mixamo/Idle.gltf",
+]
+const ANIM_SOURCES: Array = [
+	["res://ASSETS/ARRISA/Catwalk Walking.fbx", "Walking"],
+	["res://ASSETS/ARRISA/Fast Run.fbx", "Running"],
+]
 
+
+func _load_and_setup_character() -> void:
 	var char_scene: PackedScene = null
-	for p in paths:
+	for p in CHAR_PATHS:
 		if ResourceLoader.exists(p):
 			char_scene = load(p) as PackedScene
 			if char_scene != null:
 				break
+	if char_scene == null:
+		return
+	var inst := char_scene.instantiate()
+	add_child(inst)
+	model_node = inst
+	anim_player = _find_animation_player(inst)
+	if anim_player == null:
+		return
 
-	if char_scene != null:
-		var inst := char_scene.instantiate()
-		add_child(inst)
-		model_node = inst
+	# normalisasi animasi bawaan jadi "Idle"
+	var names: Array = anim_player.get_animation_list()
+	for n in names:
+		if String(n) != "Idle":
+			var a := anim_player.get_animation(n)
+			anim_player.remove_animation(n)
+			anim_player.add_animation("Idle", a)
 
-		# Cari AnimationPlayer di dalam scene ter-instansiasi
-		anim_player = _find_animation_player(inst)
-		if anim_player != null:
-			if anim_player.has_animation("Idle"):
-				anim_player.play("Idle")
-			elif anim_player.has_animation("Scene"):
-				anim_player.play("Scene")
+	# jahit Walking/Running dari FBX lain dengan rig Mixamo yang sama
+	for src in ANIM_SOURCES:
+		var path: String = src[0]
+		var alias: String = src[1]
+		if not ResourceLoader.exists(path):
+			continue
+		var sc := load(path) as PackedScene
+		if sc == null:
+			continue
+		var tmp := sc.instantiate()
+		var tp := _find_animation_player(tmp)
+		if tp != null:
+			var tl: Array = tp.get_animation_list()
+			if tl.size() > 0:
+				anim_player.add_animation(alias, tp.get_animation(tl[0]))
+		tmp.free()
+
+	if anim_player.has_animation("Idle"):
+		anim_player.play("Idle")
 
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
@@ -67,6 +97,8 @@ func _physics_process(dt: float) -> void:
 		target_anim = "Running"
 	elif speed > 0.15:
 		target_anim = "Walking"
+	if anim_player != null and target_anim == "Sprint" and not anim_player.has_animation("Sprint"):
+		target_anim = "Running"  # fallback: sprint = run + speed_scale tinggi
 
 	if anim_player != null:
 		# stride match: playback ikut kecepatan biar kaki nggak seluncur
