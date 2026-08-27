@@ -191,3 +191,17 @@ Catatan bukti per build. Format entri:
 - Catatan jujur: shader grass & pose proxy belum pernah terlihat mata
   (headless tak render visual) — UAT adalah verifikasi visual pertama;
   toggle BAY/RPT siap jadi katup bila FPS jatuh.
+
+## Entri #10 — 2026-08-28 · UTANG BUG: remove_animation (CI merah run terakhir)
+
+- Gejala: `Nonexistent function 'remove_animation' in base 'AnimationPlayer'`
+  di proxy_humanoid.gd:50 (boot CI).
+- Akar: di Godot 4 animasi hidup di **AnimationLibrary**; AnimationPlayer
+  punya add_animation (jalan) tapi remove harus via library.
+- Rencana fix (DITUNDA atas permintaan user, eksekusi setelah diskusi engine):
+  ```
+  var lib := anim_player.get_animation_library("")
+  lib.remove_animation(n)
+  ```
+  + gate lokal + push + UAT.
+- Dampak sekarang: run CI merah ⇒ APK ronde Arissa/siang BELUM kebentuk.
