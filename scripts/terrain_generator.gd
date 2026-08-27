@@ -105,16 +105,18 @@ func _build_terrain() -> void:
 	mi.material_override = mat
 	add_child(mi)
 
-	# collision trimesh (static saja — aturan kita)
-	var faces := PackedVector3Array()
-	for i in range(0, idx.size(), 3):
-		faces.append(verts[idx[i]])
-		faces.append(verts[idx[i + 1]])
-		faces.append(verts[idx[i + 2]])
-	var shape := ConcavePolygonShape3D.new()
-	shape.set_faces(faces)
+	# collision terrain: HeightMapShape3D (tool resmi — concave trimesh
+	# bikin CharacterBody nyangkut di internal edges, pelajaran UAT #9)
+	var hshape := HeightMapShape3D.new()
+	hshape.map_width = n + 1
+	hshape.map_depth = n + 1
+	var data := PackedFloat32Array()
+	for row in heights:
+		for hval in row:
+			data.append(hval)
+	hshape.set_data(data)
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()
-	col.shape = shape
+	col.shape = hshape
 	body.add_child(col)
 	add_child(body)

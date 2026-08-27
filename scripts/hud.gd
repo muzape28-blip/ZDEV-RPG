@@ -98,9 +98,11 @@ func _make_button(slot: int) -> Control:
 
 
 func _build_chips() -> void:
-	chip_shadow_lbl = _chip("BAY:ON", Vector2(40.0, 126.0))
+	# kanan-atas (kiri = zona joystick floating, permintaan user UAT #9)
+	var vp := get_viewport().get_visible_rect().size
+	chip_shadow_lbl = _chip("BAY:ON", Vector2(vp.x - 140.0, 66.0))
 	chip_shadow_lbl.gui_input.connect(_on_chip_shadow)
-	chip_grass_lbl = _chip("RPT:JRG", Vector2(40.0, 174.0))
+	chip_grass_lbl = _chip("RPT:JRG", Vector2(vp.x - 140.0, 114.0))
 	chip_grass_lbl.gui_input.connect(_on_chip_grass)
 
 

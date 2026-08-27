@@ -62,11 +62,14 @@ func rebuild(d: int) -> void:
 			h = ter.get_height_at(wx, wz)
 		var t := Transform3D()
 		t.basis = t.basis.rotated(Vector3.UP, rng.randf_range(0.0, TAU))
-		var s := rng.randf_range(0.8, 1.4)
-		t.basis = t.basis.scaled(Vector3(s, rng.randf_range(0.66, 1.66), s))
+		var s := rng.randf_range(0.5, 0.9)
+		var sy := rng.randf_range(0.2, 0.5)  # tinggi nyata 0.2-0.5 m (setinggi lutut)
+		t.basis = t.basis.scaled(Vector3(s, sy, s))
 		t.origin = Vector3(wx, h - 0.02, wz)
 		mm.set_instance_transform(placed, t)
 		var tint := Color(0.55, 0.45, 0.25).lerp(Color(0.75, 0.65, 0.4), rng.randf())
+		if rng.randf() < 0.06:
+			tint = Color(0.6, 0.4, 0.75)  # aksen bunga liar (vibe referensi)
 		mm.set_instance_color(placed, tint)
 		placed += 1
 	mm.instance_count = maxi(placed, 1)
