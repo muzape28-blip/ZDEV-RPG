@@ -167,3 +167,14 @@ Catatan bukti per build. Format entri:
 - **Gerbang CI permanen (menunggu paste user sekali):** step PARSE-CHECK +
   BOOT-CHECK headless di docs/ci/android-build.yml — CI tidak bergantung
   pada persistensi sandbox.
+
+## Entri #7 — 2026-08-27 · M0 LULUS PENUH 🎉
+
+- **Screenshot user:** HUD lengkap (bar tipis, glyph, joystick), DIAG
+  `hud=true anak=8 pivot=true`, **FPS 40** (target 45 / lantai 30 ⇒ dalam
+  koridor; catat sebagai baseline sebelum bayangan & terrain baru).
+- Kamera yaw+pitch berfungsi; semua kontrol hidup.
+- **M0 ditutup.** Fase berikutnya (disetujui user untuk dirancang):
+  logika gerakan proxy humanoid + modifikasi medan.
+- Aturan baru berjalan: verifikasi isi remote pasca-push (menangkap
+  hilangnya deklarasi di entri #6).
