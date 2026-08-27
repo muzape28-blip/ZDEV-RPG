@@ -178,3 +178,16 @@ Catatan bukti per build. Format entri:
   logika gerakan proxy humanoid + modifikasi medan.
 - Aturan baru berjalan: verifikasi isi remote pasca-push (menangkap
   hilangnya deklarasi di entri #6).
+
+## Entri #8 — 2026-08-27 · Push gabungan T1+T2+T3 (S1-S3, 6 commit mikro)
+
+- Slice C1 terrain (heightmap pusat datar + trimesh + shadow disiplin),
+  C2 rumput (cutout, sway+gust, fade, density API), C3 batuan+monolit
+  (pohon pensiun), C4 chip toggle debug, C5 proxy humanoid 1.82 m
+  (locomotion fase-terkecepatan, ponytail spring, pose slide, konform
+  tanah), C6 kamera disesuaikan.
+- Semua slice HIJAU verify-local sebelum push (aturan dipatuhi).
+- Menuju SATU UAT gabungan (checklist 8 poin di RENCANA-T123 §1).
+- Catatan jujur: shader grass & pose proxy belum pernah terlihat mata
+  (headless tak render visual) — UAT adalah verifikasi visual pertama;
+  toggle BAY/RPT siap jadi katup bila FPS jatuh.
