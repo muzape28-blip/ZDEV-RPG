@@ -106,15 +106,17 @@ func _build_terrain() -> void:
 	add_child(mi)
 
 	# collision terrain: HeightMapShape3D (tool resmi — concave trimesh
-	# bikin CharacterBody nyangkut di internal edges, pelajaran UAT #9)
+	# bikin CharacterBody nyangkut di internal edges, pelajaran UAT #9).
+	# API resmi 4.7: property map_data + spacing WAJIB 1 unit (docs).
+	var w := int(size) + 1
 	var hshape := HeightMapShape3D.new()
-	hshape.map_width = n + 1
-	hshape.map_depth = n + 1
+	hshape.map_width = w
+	hshape.map_depth = w
 	var data := PackedFloat32Array()
-	for row in heights:
-		for hval in row:
-			data.append(hval)
-	hshape.set_data(data)
+	for iz in range(w):
+		for ix in range(w):
+			data.append(get_height_at(-size * 0.5 + float(ix), -size * 0.5 + float(iz)))
+	hshape.map_data = data
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()
 	col.shape = hshape
