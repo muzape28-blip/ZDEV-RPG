@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/arena_spawner.gd" id="4_spawner"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="5_hud"]
 [ext_resource type="Script" path="res://scripts/terrain_generator.gd" id="6_ter"]
+[ext_resource type="Script" path="res://scripts/grass.gd" id="7_grass"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.16, 0.13, 0.22, 1)
@@ -51,6 +52,9 @@ directional_shadow_max_distance = 60.0
 
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("6_ter")
+
+[node name="Grass" type="Node3D" parent="."]
+script = ExtResource("7_grass")
 
 [node name="ArenaSpawner" type="Node3D" parent="."]
 script = ExtResource("4_spawner")
