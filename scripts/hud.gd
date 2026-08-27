@@ -23,6 +23,13 @@ var cam_last_y := 0.0
 var cam_pitch := 0.0
 var _fps_acc := 0.0
 
+# Chip toggle DEBUG (sementara, kiri-atas = zona mati jempol).
+# Menu gear beneran = fase polish (non-goal sekarang).
+var shadow_on := true
+var grass_density := 1
+var chip_shadow_lbl: Label = null
+var chip_grass_lbl: Label = null
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -47,6 +54,8 @@ func _ready() -> void:
 	fps_label.text = "FPS --"
 	fps_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(fps_label)
+
+	_build_chips()
 
 	var joystick := Control.new()
 	joystick.set_script(load("res://scripts/floating_joystick.gd"))
@@ -86,6 +95,54 @@ func _make_button(slot: int) -> Control:
 	button_rects.append(Rect2(x - 12.0, y - 12.0, r * 2.0 + 24.0, r * 2.0 + 24.0))
 	add_child(b)
 	return b
+
+
+func _build_chips() -> void:
+	chip_shadow_lbl = _chip("BAY:ON", Vector2(40.0, 126.0))
+	chip_shadow_lbl.gui_input.connect(_on_chip_shadow)
+	chip_grass_lbl = _chip("RPT:JRG", Vector2(40.0, 174.0))
+	chip_grass_lbl.gui_input.connect(_on_chip_grass)
+
+
+func _chip(text: String, pos: Vector2) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 15)
+	l.add_theme_color_override("font_color", Color(1.0, 0.92, 0.5, 0.9))
+	l.position = pos
+	l.size = Vector2(120.0, 44.0)
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	add_child(l)
+	return l
+
+
+func _chip_pressed(event: InputEvent) -> bool:
+	if event is InputEventScreenTouch:
+		return event.pressed
+	if event is InputEventMouseButton:
+		return event.pressed
+	return false
+
+
+func _on_chip_shadow(event: InputEvent) -> void:
+	if not _chip_pressed(event):
+		return
+	shadow_on = not shadow_on
+	var sun := get_node_or_null("/root/Main/Sun")
+	if sun != null:
+		sun.shadow_enabled = shadow_on
+	chip_shadow_lbl.text = "BAY:ON" if shadow_on else "BAY:OFF"
+
+
+func _on_chip_grass(event: InputEvent) -> void:
+	if not _chip_pressed(event):
+		return
+	grass_density = (grass_density + 1) % 3
+	var g := get_node_or_null("/root/Main/Grass")
+	if g != null and g.has_method("rebuild"):
+		g.rebuild(grass_density)
+	var nama := ["RPT:OFF", "RPT:JRG", "RPT:SDG"]
+	chip_grass_lbl.text = nama[grass_density]
 
 
 # ---- INPUT LAYAR: satu pintu, kanal terbukti ----
