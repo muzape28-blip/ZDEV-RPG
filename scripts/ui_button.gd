@@ -4,7 +4,7 @@ extends Control
 # tidak bergantung emoji/font OEM — AGENTS.md §12).
 signal action_pressed
 
-enum Glyph { SWORD, DASH }
+enum Glyph { SWORD, DASH, PARRY }
 
 @export var glyph: Glyph = Glyph.SWORD
 @export var radius := 44.0
@@ -48,3 +48,7 @@ func _draw() -> void:
 			draw_line(c + Vector2(0, 0), c + Vector2(-14, 10), g, 4.0)
 			draw_line(c + Vector2(0, -10), c + Vector2(14, 0), g, 4.0)
 			draw_line(c + Vector2(14, 0), c + Vector2(0, 10), g, 4.0)
+		Glyph.PARRY:
+			# pedang tegak = parry
+			draw_line(c + Vector2(0, 14), c + Vector2(0, -10), g, 4.0)
+			draw_line(c + Vector2(-7, -3), c + Vector2(7, -3), g, 4.0)

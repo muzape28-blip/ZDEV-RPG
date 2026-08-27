@@ -22,6 +22,8 @@ var cam_last_x := 0.0
 var cam_last_y := 0.0
 var cam_pitch := 0.0
 var _fps_acc := 0.0
+var bar_w := 0.0
+var hurt_t := 0.0
 
 # Chip toggle DEBUG (sementara, kiri-atas = zona mati jempol).
 # Menu gear beneran = fase polish (non-goal sekarang).
@@ -37,7 +39,7 @@ func _ready() -> void:
 	pivot = get_node_or_null("/root/Main/Player/CameraPivot")
 
 	var vp := get_viewport().get_visible_rect().size
-	var bar_w := minf(vp.x * 0.62, 760.0)
+	bar_w = minf(vp.x * 0.62, 760.0)
 	var x0 := (vp.x - bar_w) / 2.0
 
 	_rect(Color(0.0, 0.0, 0.0, 0.55), Rect2(x0, 16, bar_w, BAR_HEIGHT))
@@ -69,6 +71,8 @@ func _ready() -> void:
 	atk.action_pressed.connect(_on_attack)
 	var dodge := _make_button(1)
 	dodge.action_pressed.connect(_on_dodge)
+	var parry := _make_button(2)
+	parry.action_pressed.connect(_on_parry)
 
 
 func _rect(col: Color, r: Rect2) -> ColorRect:
@@ -84,11 +88,17 @@ func _rect(col: Color, r: Rect2) -> ColorRect:
 func _make_button(slot: int) -> Control:
 	var b := Control.new()
 	b.set_script(load("res://scripts/ui_button.gd"))
-	var r := 46.0 if slot == 0 else 38.0
-	b.glyph = 0 if slot == 0 else 1
+	var r := 46.0 if slot == 0 else (38.0 if slot == 1 else 34.0)
+	b.glyph = slot
 	b.radius = r
 	var vp := get_viewport().get_visible_rect().size
-	var x := vp.x - (r * 2.0 + 24.0) if slot == 0 else vp.x - (r * 2.0 + 24.0 + 100.0)
+	var x: float
+	if slot == 0:
+		x = vp.x - (r * 2.0 + 24.0)
+	elif slot == 1:
+		x = vp.x - (r * 2.0 + 24.0 + 100.0)
+	else:
+		x = vp.x - (r * 2.0 + 24.0 + 190.0)
 	var y := vp.y - (r * 2.0 + 34.0) if slot == 0 else vp.y - (r * 2.0 + 48.0)
 	b.position = Vector2(x, y)
 	b.size = Vector2(r * 2.0, r * 2.0)
@@ -196,8 +206,30 @@ func _on_dodge() -> void:
 		player.request_dodge()
 
 
+func _on_parry() -> void:
+	if player:
+		player.request_parry()
+
+
+func set_boss(f: float) -> void:
+	if boss_fg != null:
+		boss_fg.size.x = bar_w * clampf(f, 0.0, 1.0)
+
+
+func set_player_hp(f: float) -> void:
+	if player_fg != null:
+		player_fg.size.x = bar_w * clampf(f, 0.0, 1.0)
+
+
+func hurt_flash() -> void:
+	hurt_t = 0.15
+
+
 func _process(delta: float) -> void:
 	_fps_acc += delta
+	hurt_t = maxf(0.0, hurt_t - delta)
+	if player_fg != null:
+		player_fg.color = Color(0.9, 0.2, 0.15) if hurt_t > 0.0 else Color(0.78, 0.92, 0.78, 0.95)
 	if _fps_acc >= 0.25:
 		_fps_acc = 0.0
 		fps_label.text = "FPS %d" % Engine.get_frames_per_second()

@@ -8,6 +8,29 @@ func _ready() -> void:
 	_diag_hud()
 
 
+# ---- kontrol waktu: hitstop & slow-mo (real-time, tak terpengaruh scale) ----
+var hitstop_until := 0
+var slowmo_until := 0
+
+
+func hitstop(ms: int) -> void:
+	hitstop_until = Time.get_ticks_msec() + ms
+
+
+func slowmo(ms: int) -> void:
+	slowmo_until = Time.get_ticks_msec() + ms
+
+
+func _process(_delta: float) -> void:
+	var now := Time.get_ticks_msec()
+	if now < hitstop_until:
+		Engine.time_scale = 0.0
+	elif now < slowmo_until:
+		Engine.time_scale = 0.3
+	else:
+		Engine.time_scale = 1.0
+
+
 func _diag_hud() -> void:
 	var scr = load("res://scripts/hud.gd")
 	var hud_root := get_node_or_null("HUD/HudRoot")
