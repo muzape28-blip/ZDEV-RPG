@@ -1,10 +1,11 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/camera_follow.gd" id="3_cam"]
 [ext_resource type="Script" path="res://scripts/arena_spawner.gd" id="4_spawner"]
 [ext_resource type="Script" path="res://scripts/hud.gd" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/terrain_generator.gd" id="6_ter"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.16, 0.13, 0.22, 1)
@@ -22,14 +23,6 @@ fog_enabled = true
 fog_light_color = Color(0.38, 0.26, 0.2, 1)
 fog_density = 0.002
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.33, 0.27, 0.16, 1)
-roughness = 1.0
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
-material = SubResource("StandardMaterial3D_ground")
-size = Vector2(300, 300)
-
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.4
 height = 1.6
@@ -43,9 +36,6 @@ material = SubResource("StandardMaterial3D_body")
 radius = 0.4
 height = 1.6
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(400, 2, 400)
-
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
 
@@ -56,16 +46,11 @@ environment = SubResource("Environment_env")
 rotation = Vector3(-1.0, 0.0, 0.6)
 light_color = Color(1.0, 0.72, 0.45, 1)
 light_energy = 1.1
-shadow_enabled = false
+shadow_enabled = true
+directional_shadow_max_distance = 60.0
 
-[node name="Ground" type="StaticBody3D" parent="."]
-
-[node name="GroundVisual" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("PlaneMesh_ground")
-
-[node name="GroundCollision" type="CollisionShape3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.0, 0)
-shape = SubResource("BoxShape3D_ground")
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("6_ter")
 
 [node name="ArenaSpawner" type="Node3D" parent="."]
 script = ExtResource("4_spawner")

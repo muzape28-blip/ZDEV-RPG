@@ -21,10 +21,12 @@ fi
 T="$ROOT/.cache/projtest"
 rm -rf "$T" && mkdir -p "$T"
 cp -r "$ROOT/project.godot" "$ROOT/export_presets.cfg" "$ROOT/scenes" "$ROOT/scripts" "$T/"
+[ -d "$ROOT/shaders" ] && cp -r "$ROOT/shaders" "$T/"
 cp "$BIN" "$T/"
 cd "$T" || exit 2
 FAIL=0
-for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner; do
+for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner terrain_generator grass proxy_humanoid; do
+  [ -f "$ROOT/scripts/$s.gd" ] || { echo "skip (belum ada): $s"; continue; }
   OUT=$(timeout 60 "$BIN" --headless --check-only --script "res://scripts/$s.gd" 2>&1 | grep -E "SCRIPT ERROR|Parse Error" | head -2)
   if [ -n "$OUT" ]; then echo "PARSE GAGAL: $s"; echo "$OUT"; FAIL=1; else echo "parse OK: $s"; fi
 done
