@@ -4,6 +4,7 @@ extends Control
 # di device; joystick jadi buktinya). Drag kanan = orbit kamera, diputar
 # lewat pivot, BUKAN lewat _unhandled_input (kanal yang terbukti tidak
 # konsisten di export Android — r/godot gabdb9).
+const SHOW_COMBAT_BUTTONS := false
 const BAR_HEIGHT := 6.0
 const CAM_SENS := 0.006
 const CAM_PITCH_SENS := 0.004
@@ -67,12 +68,15 @@ func _ready() -> void:
 	add_child(joystick)
 	joystick.moved.connect(_on_move)
 
-	var atk := _make_button(0)
-	atk.action_pressed.connect(_on_attack)
+	# FOKUS MOVEMENT (permintaan user): tombol serang+parry tidur dulu;
+	# kode combat tetap utuh, tinggal balikkan flag saat senjata masuk.
+	if SHOW_COMBAT_BUTTONS:
+		var atk := _make_button(0)
+		atk.action_pressed.connect(_on_attack)
+		var parry := _make_button(2)
+		parry.action_pressed.connect(_on_parry)
 	var dodge := _make_button(1)
 	dodge.action_pressed.connect(_on_dodge)
-	var parry := _make_button(2)
-	parry.action_pressed.connect(_on_parry)
 
 
 func _rect(col: Color, r: Rect2) -> ColorRect:
@@ -158,30 +162,56 @@ func _on_chip_grass(event: InputEvent) -> void:
 
 
 # ---- INPUT LAYAR: satu pintu, kanal terbukti ----
+var touch_pos: Dictionary = {}
+var zoom_mode := false
+var last_pinch_d := 0.0
+
+
 func _input(event: InputEvent) -> void:
 	var vp_w := get_viewport().get_visible_rect().size.x
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			if _over_button(event.position):
-				return  # biar tombol yang urus
-			if cam_drag_id == -1 and event.position.x > vp_w * 0.5:
+			touch_pos[event.index] = event.position
+			if touch_pos.size() == 2:
+				# PINCH ZOOM mulai: batalkan yaw-drag
+				zoom_mode = true
+				cam_drag_id = -1
+				last_pinch_d = 0.0
+				if pivot != null:
+					pivot.dragging = false
+			elif not _over_button(event.position) and event.position.x > vp_w * 0.5 and cam_drag_id == -1:
 				cam_drag_id = event.index
 				cam_last_x = event.position.x
 				cam_last_y = event.position.y
+				if pivot != null:
+					pivot.dragging = true
+		else:
+			touch_pos.erase(event.index)
+			if event.index == cam_drag_id:
+				cam_drag_id = -1
+				if pivot != null:
+					pivot.dragging = false
+			if touch_pos.size() < 2:
+				zoom_mode = false
+				last_pinch_d = 0.0
+	elif event is InputEventScreenDrag:
+		touch_pos[event.index] = event.position
+		if zoom_mode and touch_pos.size() >= 2:
+			var pts: Array = touch_pos.values()
+			var d: float = pts[0].distance_to(pts[1])
+			if last_pinch_d > 0.0 and pivot != null:
+				pivot.adjust_dist((last_pinch_d - d) * 0.02)
+			last_pinch_d = d
 		elif event.index == cam_drag_id:
-			cam_drag_id = -1
-	elif event is InputEventScreenDrag and event.index == cam_drag_id:
-		var drag := event as InputEventScreenDrag
-		var dx := drag.position.x - cam_last_x
-		var dy := drag.position.y - cam_last_y
-		cam_last_x = drag.position.x
-		cam_last_y = drag.position.y
-		if pivot != null:
-			pivot.rotation.y -= dx * CAM_SENS
-			# pitch: drag vertikal, clamp aman (tidak tembus tanah / tidak
-			# top-down ekstrem). UAT #4: kamera baru 70% (yaw saja).
-			cam_pitch = clampf(cam_pitch + dy * CAM_PITCH_SENS, PITCH_MIN, PITCH_MAX)
-			pivot.rotation.x = cam_pitch
+			var drag := event as InputEventScreenDrag
+			var dx := drag.position.x - cam_last_x
+			var dy := drag.position.y - cam_last_y
+			cam_last_x = drag.position.x
+			cam_last_y = drag.position.y
+			if pivot != null:
+				pivot.rotation.y -= dx * CAM_SENS
+				cam_pitch = clampf(cam_pitch + dy * CAM_PITCH_SENS, PITCH_MIN, PITCH_MAX)
+				pivot.rotation.x = cam_pitch
 
 
 func _over_button(p: Vector2) -> bool:

@@ -1,12 +1,11 @@
 shader_type spatial;
 render_mode cull_disabled, shadows_disabled;
 
-// Rumput sabana: cutout opaque (bukan transparan — overdraw = musuh Mali),
-// sway+gust di vertex, fade jarak lewat uniform cam_pos (dipasang CPU,
-// menghindari builtin eksotis).
+// Rumput sabana hijau: cutout opaque (anti-overdraw), sway+gust angin,
+// fade jarak via uniform cam_pos. Akar gelap -> ujung terang (depth alami).
 uniform float sway_strength : hint_range(0.0, 0.2) = 0.06;
 uniform float fade_start : hint_range(1.0, 60.0) = 10.0;
-uniform float fade_end : hint_range(1.0, 80.0) = 15.0;
+uniform float fade_end : hint_range(1.0, 80.0) = 16.0;
 uniform vec3 cam_pos = vec3(0.0, 0.0, 0.0);
 
 varying float v_h;
@@ -27,14 +26,17 @@ void fragment() {
 	if (v_fade <= 0.001) {
 		discard;
 	}
-	// mask prosedural 4 helai meruncing
+	// mask helai: strip prosedural meruncing
 	float x = UV.x;
-	float w = 0.10 * (1.0 - v_h * 0.85);
-	float m = step(abs(x - 0.18), w) + step(abs(x - 0.45), w * 0.8)
-			+ step(abs(x - 0.70), w) + step(abs(x - 0.90), w * 0.7);
+	float w = 0.5 * (1.0 - v_h * 0.85);
+	if (w < 0.05) {
+		// ujung helai tetap runcing
+		w = 0.05;
+	}
+	float m = step(abs(x - 0.5), w * (1.0 - v_h * 0.9) + 0.02);
 	if (m < 0.5) {
 		discard;
 	}
-	ALBEDO = COLOR.rgb * mix(vec3(0.55), vec3(1.15), v_h);
+	ALBEDO = COLOR.rgb * mix(vec3(0.4), vec3(1.25), v_h);
 	ROUGHNESS = 1.0;
 }

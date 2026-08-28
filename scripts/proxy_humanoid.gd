@@ -7,6 +7,14 @@ extends Node3D
 var anim_player: AnimationPlayer
 var model_node: Node3D
 var current_anim := "Idle"
+var one_shot_active := false
+
+
+# dipanggil player_controller saat dodge berarah
+func play_one_shot(anim: String) -> void:
+	if anim_player != null and anim != "" and anim_player.has_animation(anim):
+		anim_player.play(anim, 0.08)
+		one_shot_active = true
 
 
 func _ready() -> void:
@@ -21,8 +29,11 @@ const CHAR_PATHS: Array = [
 	"res://ASSETS/mixamo/Idle.gltf",
 ]
 const ANIM_SOURCES: Array = [
-	["res://ASSETS/ARRISA/Catwalk Walking.fbx", "Walking"],
-	["res://ASSETS/ARRISA/Fast Run.fbx", "Running"],
+	["res://ASSETS/ARRISA/Catwalk Walking.fbx", "Walking", true],
+	["res://ASSETS/ARRISA/Fast Run.fbx", "Running", true],
+	["res://ASSETS/ARRISA/Standing Dodge Left.fbx", "DodgeLeft", false],
+	["res://ASSETS/ARRISA/Standing Dodge Right.fbx", "DodgeRight", false],
+	["res://ASSETS/ARRISA/Standing Dodge Backward.fbx", "DodgeBack", false],
 ]
 
 
@@ -36,6 +47,7 @@ func _load_and_setup_character() -> void:
 	if char_scene == null:
 		return
 	var inst := char_scene.instantiate()
+	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
 	add_child(inst)
 	model_node = inst
 	anim_player = _find_animation_player(inst)
@@ -64,6 +76,7 @@ func _load_and_setup_character() -> void:
 	for src in ANIM_SOURCES:
 		var path: String = src[0]
 		var alias: String = src[1]
+		var loop_it: bool = src[2]
 		if not ResourceLoader.exists(path):
 			continue
 		var sc := load(path) as PackedScene
@@ -74,8 +87,15 @@ func _load_and_setup_character() -> void:
 		if tp != null:
 			var tl: Array = tp.get_animation_list()
 			if tl.size() > 0 and not lib.has_animation(alias):
-				lib.add_animation(alias, tp.get_animation(tl[0]))
+				var an := tp.get_animation(tl[0])
+				an.loop_mode = Animation.LOOP_LINEAR if loop_it else Animation.LOOP_NONE
+				lib.add_animation(alias, an)
 		tmp.free()
+
+	# pastikan locomotion loop (pelajaran UAT: anim beku setelah 3-4 langkah)
+	for nm in ["Idle", "Walking", "Running"]:
+		if lib.has_animation(nm):
+			lib.get_animation(nm).loop_mode = Animation.LOOP_LINEAR
 
 	if anim_player.has_animation("Idle"):
 		anim_player.play("Idle")
@@ -110,7 +130,15 @@ func _physics_process(dt: float) -> void:
 	if anim_player != null and target_anim == "Sprint" and not anim_player.has_animation("Sprint"):
 		target_anim = "Running"  # fallback: sprint = run + speed_scale tinggi
 
-	if anim_player != null:
+	# one-shot (dodge)优先: jangan ditimpa switching sampai selesai
+	var skip_switch := false
+	if one_shot_active:
+		if anim_player != null and anim_player.is_playing():
+			skip_switch = true
+		else:
+			one_shot_active = false
+
+	if anim_player != null and not skip_switch:
 		# stride match: playback ikut kecepatan biar kaki nggak seluncur
 		anim_player.speed_scale = clampf(lerp(0.9, 1.35, ratio), 0.5, 1.6)
 		if anim_player.has_animation(target_anim):

@@ -25,10 +25,33 @@ func request_dodge() -> void:
 	if dash_timer > 0.0:
 		return
 	var dir := _move_direction()
+	var alias := ""
 	if dir.length_squared() < 0.01:
-		dir = -global_transform.basis.z
+		# tanpa input: dash MENJAUHI kamera (masuk layar), bukan mundur
+		var cam := get_node_or_null("CameraPivot/Camera3D")
+		if cam != null:
+			dir = -cam.global_transform.basis.z
+		else:
+			dir = -global_transform.basis.z
+		dir.y = 0.0
+	else:
+		# arah relatif hadap => pilih anim dodge berarah (aset user)
+		var fwd := -global_transform.basis.z
+		fwd.y = 0.0
+		if fwd.length_squared() > 0.01:
+			fwd = fwd.normalized()
+		var rgt := Vector3(-fwd.z, 0.0, fwd.x)
+		var lat := dir.dot(rgt)
+		var lon := dir.dot(fwd)
+		if abs(lat) > abs(lon):
+			alias = "DodgeRight" if lat > 0.0 else "DodgeLeft"
+		elif lon < 0.0:
+			alias = "DodgeBack"
 	dash_dir = dir.normalized()
 	dash_timer = dash_duration
+	var proxy := get_node_or_null("Proxy")
+	if proxy != null and proxy.has_method("play_one_shot"):
+		proxy.play_one_shot(alias)
 
 
 var hp := 100.0
@@ -135,7 +158,12 @@ func _physics_process(delta: float) -> void:
 		velocity.z = lunge_dir.z * 7.0
 	else:
 		var dir := _move_direction()
-		var target := dir * walk_speed
+		# ANALOG speed (permintaan UAT): stick dikit = jalan, penuh = lari
+		var mag := move_input.length()
+		var spd := 6.0 * mag
+		if mag > 0.15 and spd < 2.0:
+			spd = 2.0
+		var target := dir * spd
 		velocity.x = move_toward(velocity.x, target.x, accel * delta)
 		velocity.z = move_toward(velocity.z, target.z, accel * delta)
 		if dir.length_squared() > 0.001:
