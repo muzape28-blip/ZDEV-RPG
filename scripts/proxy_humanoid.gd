@@ -34,6 +34,7 @@ const ANIM_SOURCES: Array = [
 	["res://ASSETS/ARRISA/Standing Dodge Left.fbx", "DodgeLeft", false],
 	["res://ASSETS/ARRISA/Standing Dodge Right.fbx", "DodgeRight", false],
 	["res://ASSETS/ARRISA/Standing Dodge Backward.fbx", "DodgeBack", false],
+	["res://ASSETS/ARRISA/Standing Dodge Forward.fbx", "DodgeForward", false],
 ]
 
 

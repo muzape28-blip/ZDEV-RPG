@@ -2,8 +2,8 @@ extends CharacterBody3D
 
 # M0: gerak + dodge. Attack masih stub (masuk M1).
 @export var walk_speed := 6.0
-@export var dash_speed := 13.0
-@export var dash_duration := 0.22
+@export var dash_speed := 15.0
+@export var dash_duration := 0.26
 @export var accel := 40.0
 @export var gravity_strength := 20.0
 
@@ -27,25 +27,28 @@ func request_dodge() -> void:
 	var dir := _move_direction()
 	var alias := ""
 	if dir.length_squared() < 0.01:
-		# tanpa input: dash MENJAUHI kamera (masuk layar), bukan mundur
+		# tanpa input: backstep dengan animasi DodgeBack
 		var cam := get_node_or_null("CameraPivot/Camera3D")
 		if cam != null:
 			dir = -cam.global_transform.basis.z
 		else:
 			dir = -global_transform.basis.z
 		dir.y = 0.0
+		alias = "DodgeBack"
 	else:
-		# arah relatif hadap => pilih anim dodge berarah (aset user)
-		var fwd := -global_transform.basis.z
-		fwd.y = 0.0
-		if fwd.length_squared() > 0.01:
-			fwd = fwd.normalized()
+		# arah stick relatif KAMERA (bukan hadap karakter — karakter selalu
+		# menghadap stick, jadi referensi hadap selalu "depan" = bug lama)
+		var pivot := get_node_or_null("CameraPivot")
+		var cyaw := pivot.rotation.y if pivot != null else 0.0
+		var fwd := Vector3(-sin(cyaw), 0.0, -cos(cyaw))
 		var rgt := Vector3(-fwd.z, 0.0, fwd.x)
 		var lat := dir.dot(rgt)
 		var lon := dir.dot(fwd)
 		if abs(lat) > abs(lon):
 			alias = "DodgeRight" if lat > 0.0 else "DodgeLeft"
-		elif lon < 0.0:
+		elif lon > 0.0:
+			alias = "DodgeForward"
+		else:
 			alias = "DodgeBack"
 	dash_dir = dir.normalized()
 	dash_timer = dash_duration
