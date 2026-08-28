@@ -11,6 +11,7 @@ func _ready() -> void:
 # ---- kontrol waktu: hitstop & slow-mo (real-time, tak terpengaruh scale) ----
 var hitstop_until := 0
 var slowmo_until := 0
+var _tel_acc := 0.0
 
 
 func hitstop(ms: int) -> void:
@@ -21,7 +22,7 @@ func slowmo(ms: int) -> void:
 	slowmo_until = Time.get_ticks_msec() + ms
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var now := Time.get_ticks_msec()
 	if now < hitstop_until:
 		Engine.time_scale = 0.0
@@ -29,6 +30,18 @@ func _process(_delta: float) -> void:
 		Engine.time_scale = 0.3
 	else:
 		Engine.time_scale = 1.0
+
+	# TELEMETRI: print state tiap 0.5 s => logcat CI = ground truth
+	_tel_acc += delta
+	if _tel_acc >= 0.5:
+		_tel_acc = 0.0
+		var p := get_node_or_null("Player")
+		var pv := get_node_or_null("Player/CameraPivot")
+		if p != null and pv != null:
+			var v: Vector3 = p.velocity
+			print("TEL stick=(%.2f,%.2f) vel=(%.2f,%.2f) face=%.2f camY=%.2f camP=%.2f dist=%.2f" % [
+				p.move_input.x, p.move_input.y, v.x, v.z,
+				p.rotation.y, pv.rotation.y, pv.rotation.x, pv.dist])
 
 
 func _diag_hud() -> void:

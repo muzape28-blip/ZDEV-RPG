@@ -87,12 +87,22 @@ jobs:
             adb shell monkey -p com.zdev.rpg -c android.intent.category.LAUNCHER 1
             sleep 25
             mkdir -p EYE
+            # e1: idle default
             adb shell screencap -p /sdcard/e1.png && adb pull /sdcard/e1.png EYE/e1.png
-            sleep 8
+            # e2: joystick maju (drag zona kiri bawah, 2 dtk)
+            adb shell input swipe 180 1250 180 1050 2000
+            sleep 1
             adb shell screencap -p /sdcard/e2.png && adb pull /sdcard/e2.png EYE/e2.png
-            adb shell input swipe 300 400 300 250 300
-            sleep 4
+            # e3: tap dodge (zona tombol dodge)
+            adb shell input tap 558 1476
+            sleep 1
             adb shell screencap -p /sdcard/e3.png && adb pull /sdcard/e3.png EYE/e3.png
+            # e4: drag kamera (kanan layar)
+            adb shell input swipe 540 700 320 700 800
+            sleep 1
+            adb shell screencap -p /sdcard/e4.png && adb pull /sdcard/e4.png EYE/e4.png
+            # ground truth: telemetri in-game dari logcat
+            adb logcat -d | grep "TEL " | tail -120 > EYE/logcat.txt || true
 
       - name: Commit screenshots back
         run: |
