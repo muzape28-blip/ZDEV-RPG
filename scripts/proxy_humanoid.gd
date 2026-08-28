@@ -49,6 +49,9 @@ func _load_and_setup_character() -> void:
 		return
 	var inst := char_scene.instantiate()
 	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
+	# Model Mixamo menghadap +Z; logika kita -Z forward.
+	# Tanpa flip: moonwalk + kamera terasa "di depan" (UAT video).
+	inst.rotation.y = PI
 	add_child(inst)
 	model_node = inst
 	anim_player = _find_animation_player(inst)

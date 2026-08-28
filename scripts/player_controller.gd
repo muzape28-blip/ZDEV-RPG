@@ -54,6 +54,7 @@ func request_dodge() -> void:
 			alias = "DodgeBack"
 	dash_dir = dir.normalized()
 	dash_timer = dash_duration
+	rot_hold = 0.3  # jangan putar badan selama & sesaat setelah dodge
 	var proxy := get_node_or_null("Proxy")
 	if proxy != null and proxy.has_method("play_one_shot"):
 		proxy.play_one_shot(alias)
@@ -66,6 +67,7 @@ var atk_buffer := 0.0
 var parry_timer := 0.0
 var lunge_timer := 0.0
 var lunge_dir := Vector3(0.0, 0.0, -1.0)
+var rot_hold := 0.0
 
 const DMGS: Array = [10.0, 10.0, 25.0]
 const CDS: Array = [0.35, 0.4, 0.62]
@@ -146,6 +148,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity_strength * delta
 
 	parry_timer = maxf(0.0, parry_timer - delta)
+	rot_hold = maxf(0.0, rot_hold - delta)
 	atk_cd -= delta
 	if atk_cd <= 0.0 and atk_buffer > 0.0:
 		atk_buffer = 0.0
@@ -171,7 +174,7 @@ func _physics_process(delta: float) -> void:
 		var target := dir * spd
 		velocity.x = move_toward(velocity.x, target.x, accel * delta)
 		velocity.z = move_toward(velocity.z, target.z, accel * delta)
-		if dir.length_squared() > 0.001:
+		if dir.length_squared() > 0.001 and dash_timer <= 0.0 and rot_hold <= 0.0:
 			var target_yaw := atan2(dir.x, dir.z)
 			rotation.y = lerp_angle(rotation.y, target_yaw, 14.0 * delta)
 

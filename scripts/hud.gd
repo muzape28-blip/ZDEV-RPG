@@ -9,7 +9,7 @@ const BAR_HEIGHT := 6.0
 const CAM_SENS := 0.006
 const CAM_PITCH_SENS := 0.004
 const PITCH_MIN := -0.5
-const PITCH_MAX := 0.3
+const PITCH_MAX := 0.6  # diperluas: boleh mendongak ke langit (UAT)
 
 var player: Node = null
 var pivot: Node = null

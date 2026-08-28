@@ -51,4 +51,6 @@ func _physics_process(dt: float) -> void:
 		dist = lerp(dist, DIST_DEFAULT, RECENTER_SPEED * dt)
 
 	if cam != null:
-		cam.look_at(target.global_position + Vector3(0.0, 1.55, 0.0), Vector3.UP)
+		# pitch tinggi => target look-at naik, biar bisa mendongak ke langit
+		var look_h := 1.55 + maxf(0.0, rotation.x - 0.25) * 3.0
+		cam.look_at(target.global_position + Vector3(0.0, look_h, 0.0), Vector3.UP)
