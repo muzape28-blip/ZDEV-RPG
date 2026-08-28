@@ -28,7 +28,7 @@ var hurt_t := 0.0
 
 # Chip toggle DEBUG (sementara, kiri-atas = zona mati jempol).
 # Menu gear beneran = fase polish (non-goal sekarang).
-var shadow_on := true
+var shadow_on := false  # default OFF demi FPS low-end; chip BAY siap toggle
 var grass_density := 1
 var chip_shadow_lbl: Label = null
 var chip_grass_lbl: Label = null
@@ -114,7 +114,7 @@ func _make_button(slot: int) -> Control:
 func _build_chips() -> void:
 	# kanan-atas (kiri = zona joystick floating, permintaan user UAT #9)
 	var vp := get_viewport().get_visible_rect().size
-	chip_shadow_lbl = _chip("BAY:ON", Vector2(vp.x - 140.0, 66.0))
+	chip_shadow_lbl = _chip("BAY:OFF", Vector2(vp.x - 140.0, 66.0))
 	chip_shadow_lbl.gui_input.connect(_on_chip_shadow)
 	chip_grass_lbl = _chip("RPT:JRG", Vector2(vp.x - 140.0, 114.0))
 	chip_grass_lbl.gui_input.connect(_on_chip_grass)

@@ -5,7 +5,7 @@ render_mode cull_disabled, shadows_disabled;
 // fade jarak via uniform cam_pos. Akar gelap -> ujung terang (depth alami).
 uniform float sway_strength : hint_range(0.0, 0.2) = 0.06;
 uniform float fade_start : hint_range(1.0, 60.0) = 10.0;
-uniform float fade_end : hint_range(1.0, 80.0) = 11.0;
+uniform float fade_end : hint_range(1.0, 80.0) = 9.0;
 uniform vec3 cam_pos = vec3(0.0, 0.0, 0.0);
 
 varying float v_h;

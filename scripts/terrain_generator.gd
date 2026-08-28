@@ -32,9 +32,9 @@ func get_height_at(x: float, z: float) -> float:
 
 func _ground_color(h: float) -> Color:
 	# sabana HIJAU terang (permintaan UAT: tanah jangan gelap)
-	var base := Color(0.36, 0.42, 0.22)
-	var low := Color(0.24, 0.33, 0.16)
-	var high := Color(0.48, 0.55, 0.28)
+	var base := Color(0.42, 0.48, 0.26)
+	var low := Color(0.28, 0.37, 0.19)
+	var high := Color(0.55, 0.62, 0.32)
 	var t := clampf((h + amplitude) / (2.0 * amplitude), 0.0, 1.0)
 	var c := low.lerp(high, t)
 	# sedikit variasi regional biar nggak rata-membosankan

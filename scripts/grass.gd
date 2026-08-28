@@ -7,7 +7,7 @@ extends Node3D
 #  - crossed planes, alpha cutout, fade jarak, sway angin
 @export var density := 1  # 0 off, 1 jarang, 2 sedang
 
-const BASE_COUNT := 1000
+const BASE_COUNT := 700
 const REBUILD_DIST := 8.0
 const SPAWN_RADIUS := 18.0
 
