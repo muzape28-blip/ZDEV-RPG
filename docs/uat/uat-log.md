@@ -261,5 +261,8 @@ ketangkep CI, lolos lokal:
 2. `env.sky.material = ShaderMaterial` => official: "Invalid assignment ...
    'material' ... on base 'Sky'". API resmi = `Sky.sky_material`.
    Alias `.material` cuma ada di build lokal (deprecated).
-Status boot gate setelah fix: menunggu CI. Pola: lokal HIJAU belum tentu
-resmi HIJAU; boot-check headless di CI = hakim runtime.
+Status boot gate setelah fix: CI HIJAU (android-build b0945f6 success,
+PARSE + BOOT + export APK lolos). Pola: lokal HIJAU belum tentu resmi
+HIJAU; boot-check headless di CI = hakim runtime. Emulator-eye di build
+yang sama: telemetri TEL hidup 57 baris tanpa error = logika sehat;
+screenshot masih hitam (keterbatasan emu, visual = lab device).
