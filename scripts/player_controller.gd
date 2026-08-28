@@ -39,7 +39,9 @@ func request_dodge() -> void:
 		# arah stick relatif KAMERA (bukan hadap karakter — karakter selalu
 		# menghadap stick, jadi referensi hadap selalu "depan" = bug lama)
 		var pivot := get_node_or_null("CameraPivot")
-		var cyaw := pivot.rotation.y if pivot != null else 0.0
+		var cyaw: float = 0.0
+		if pivot != null:
+			cyaw = pivot.rotation.y
 		var fwd := Vector3(-sin(cyaw), 0.0, -cos(cyaw))
 		var rgt := Vector3(-fwd.z, 0.0, fwd.x)
 		var lat := dir.dot(rgt)
