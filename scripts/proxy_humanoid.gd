@@ -43,12 +43,20 @@ func _load_and_setup_character() -> void:
 		return
 
 	# normalisasi animasi bawaan jadi "Idle"
+	# (Godot 4: remove/add hidup di AnimationLibrary, bukan AnimationPlayer —
+	#  pelajaran CI merah run terakhir)
+	var lib := anim_player.get_animation_library("")
 	var names: Array = anim_player.get_animation_list()
+	var first := true
 	for n in names:
-		if String(n) != "Idle":
-			var a := anim_player.get_animation(n)
-			anim_player.remove_animation(n)
-			anim_player.add_animation("Idle", a)
+		if first:
+			if String(n) != "Idle":
+				var a := anim_player.get_animation(n)
+				lib.remove_animation(n)
+				lib.add_animation("Idle", a)
+			first = false
+		else:
+			lib.remove_animation(n)
 
 	# jahit Walking/Running dari FBX lain dengan rig Mixamo yang sama
 	for src in ANIM_SOURCES:
