@@ -5,7 +5,7 @@ extends Node3D
 #  - variasi ukuran ±20%+ & skala per-clump [polycount Bajwa]
 #  - variasi warna frekuensi kecil + sedikit helai kering di sela hijau
 #  - crossed planes, alpha cutout, fade jarak, sway angin
-@export var density := 1  # 0 off, 1 jarang, 2 sedang
+@export var density := 0  # PADANG BASIC default tidur; 1 jarang, 2 sedang
 
 const BASE_COUNT := 700
 const REBUILD_DIST := 8.0

@@ -11,10 +11,18 @@ var move_input := Vector2.ZERO
 var dash_timer := 0.0
 var dash_dir := Vector3(0.0, 0.0, -1.0)
 var cam: Node = null
+var move_smooth := Vector3.ZERO
 
 
 func _ready() -> void:
 	cam = get_node_or_null("CameraPivot")
+	# Guard preventif CharacterBody3D (riset bug dasar): anti-jitter dinding,
+	# anti-meluncur di lereng, snap tanah. [bugnet wall-jitter & slope-slide]
+	max_slides = 6
+	wall_min_slide_angle = deg_to_rad(15.0)
+	slide_on_ceiling = false
+	floor_snap_length = 0.6
+	floor_stop_on_slope = true
 
 
 func set_move_input(v: Vector2) -> void:
@@ -168,17 +176,23 @@ func _physics_process(delta: float) -> void:
 		velocity.z = lunge_dir.z * 7.0
 	else:
 		var dir := _move_direction()
-		# ANALOG speed (permintaan UAT): stick dikit = jalan, penuh = lari
+		# PAKET ANTI-MOBIL: kurva pow 1.25 = rasa gas-pedal;
+		# smoothing arah = anti zig-zag overcorrection; turn-rate 26 =
+		# "menghadap" bukan "menyetir".
 		var mag := move_input.length()
-		var spd := 6.0 * mag
+		var spd := pow(mag, 1.25) * 6.0
 		if mag > 0.15 and spd < 2.0:
 			spd = 2.0
-		var target := dir * spd
+		if mag < 0.05 and is_on_floor():
+			velocity.x = 0.0  # zero saat idle di lantai: anti-drift gravitasi
+			velocity.z = 0.0
+		move_smooth = move_smooth.lerp(dir, clampf(14.0 * delta, 0.0, 1.0))
+		var target := move_smooth * spd
 		velocity.x = move_toward(velocity.x, target.x, accel * delta)
 		velocity.z = move_toward(velocity.z, target.z, accel * delta)
-		if dir.length_squared() > 0.001 and dash_timer <= 0.0 and rot_hold <= 0.0:
-			var target_yaw := atan2(dir.x, dir.z)
-			rotation.y = lerp_angle(rotation.y, target_yaw, 14.0 * delta)
+		if move_smooth.length_squared() > 0.001 and dash_timer <= 0.0 and rot_hold <= 0.0:
+			var target_yaw := atan2(move_smooth.x, move_smooth.z)
+			rotation.y = lerp_angle(rotation.y, target_yaw, 26.0 * delta)
 
 	move_and_slide()
 

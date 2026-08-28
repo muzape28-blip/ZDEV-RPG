@@ -5,7 +5,7 @@ extends Node3D
 # (stability > detail), Wilderless (variasi regional).
 @export var size := 300.0
 @export var resolution := 64
-@export var amplitude := 2.6
+@export var amplitude := 0.0  # PADANG BASIC: datar total; bukit = fase nanti
 @export var flat_radius := 12.0
 @export var blend_width := 18.0
 @export var seed_value := 11
@@ -31,10 +31,10 @@ func get_height_at(x: float, z: float) -> float:
 
 
 func _ground_color(h: float) -> Color:
-	# sabana HIJAU terang (permintaan UAT: tanah jangan gelap)
-	var base := Color(0.42, 0.48, 0.26)
-	var low := Color(0.28, 0.37, 0.19)
-	var high := Color(0.55, 0.62, 0.32)
+	# PADANG PASIR dasar: tan hangat, kontras sama karakter & landmark
+	var base := Color(0.62, 0.53, 0.38)
+	var low := Color(0.5, 0.42, 0.3)
+	var high := Color(0.7, 0.62, 0.45)
 	var t := clampf((h + amplitude) / (2.0 * amplitude), 0.0, 1.0)
 	var c := low.lerp(high, t)
 	# sedikit variasi regional biar nggak rata-membosankan
@@ -107,20 +107,13 @@ func _build_terrain() -> void:
 	mi.cast_shadow = 0  # OFF: tanah menerima bayangan saja, tak casting (hemat)
 	add_child(mi)
 
-	# collision terrain: HeightMapShape3D (tool resmi — concave trimesh
-	# bikin CharacterBody nyangkut di internal edges, pelajaran UAT #9).
-	# API resmi 4.7: property map_data + spacing WAJIB 1 unit (docs).
-	var w := int(size) + 1
-	var hshape := HeightMapShape3D.new()
-	hshape.map_width = w
-	hshape.map_depth = w
-	var data := PackedFloat32Array()
-	for iz in range(w):
-		for ix in range(w):
-			data.append(get_height_at(-size * 0.5 + float(ix), -size * 0.5 + float(iz)))
-	hshape.map_data = data
+	# PADANG BASIC: kolisi Box sederhana = kelas bug "nyangkut/tenggelam"
+	# musnah; primitif > heightmap/trimesh untuk fase basic (riset bug dasar).
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()
-	col.shape = hshape
+	var box := BoxShape3D.new()
+	box.size = Vector3(size, 2.0, size)
+	col.shape = box
+	col.position = Vector3(0.0, -1.0, 0.0)
 	body.add_child(col)
 	add_child(body)

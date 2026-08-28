@@ -6,6 +6,23 @@ extends Node3D
 func _ready() -> void:
 	Engine.max_fps = 45
 	_diag_hud()
+	_setup_sun_sky()
+
+
+# Matahari sky-shader terkunci ke arah DirectionalLight:
+# langit + cahaya = satu sumber kebenaran. [sky shader sun disc]
+func _setup_sun_sky() -> void:
+	var we := get_node_or_null("WorldEnvironment")
+	var sun := get_node_or_null("Sun")
+	if we == null or sun == null:
+		return
+	var env := we.environment
+	if env == null or env.sky == null:
+		return
+	var sm := ShaderMaterial.new()
+	sm.shader = load("res://shaders/sky_sun.gdshader")
+	env.sky.material = sm
+	sm.set_shader_parameter("sun_dir", sun.global_transform.basis.z)
 
 
 # ---- kontrol waktu: hitstop & slow-mo (real-time, tak terpengaruh scale) ----

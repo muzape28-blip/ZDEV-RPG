@@ -29,9 +29,10 @@ var hurt_t := 0.0
 # Chip toggle DEBUG (sementara, kiri-atas = zona mati jempol).
 # Menu gear beneran = fase polish (non-goal sekarang).
 var shadow_on := false  # default OFF demi FPS low-end; chip BAY siap toggle
-var grass_density := 1
+var grass_density := 0  # PADANG BASIC: rumput tidur default; chip RPT siap
 var chip_shadow_lbl: Label = null
 var chip_grass_lbl: Label = null
+var joystick: Control = null
 
 
 func _ready() -> void:
@@ -60,7 +61,7 @@ func _ready() -> void:
 
 	_build_chips()
 
-	var joystick := Control.new()
+	joystick = Control.new()
 	joystick.set_script(load("res://scripts/floating_joystick.gd"))
 	joystick.anchor_right = 0.5
 	joystick.anchor_bottom = 1.0
@@ -116,7 +117,7 @@ func _build_chips() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	chip_shadow_lbl = _chip("BAY:OFF", Vector2(vp.x - 140.0, 66.0))
 	chip_shadow_lbl.gui_input.connect(_on_chip_shadow)
-	chip_grass_lbl = _chip("RPT:JRG", Vector2(vp.x - 140.0, 114.0))
+	chip_grass_lbl = _chip("RPT:OFF", Vector2(vp.x - 140.0, 114.0))
 	chip_grass_lbl.gui_input.connect(_on_chip_grass)
 
 
@@ -223,6 +224,20 @@ func _over_button(p: Vector2) -> bool:
 		if r.has_point(p):
 			return true
 	return false
+
+
+# App pause bisa menelan touch-release => stick/zoom nyangkut.
+# Bersihkan semua state sentuh saat kehilangan fokus. [ghost-input Android]
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		touch_pos.clear()
+		zoom_mode = false
+		last_pinch_d = 0.0
+		cam_drag_id = -1
+		if pivot != null:
+			pivot.dragging = false
+		if joystick != null and joystick.has_method("release_all"):
+			joystick.release_all()
 
 
 func _on_move(v: Vector2) -> void:

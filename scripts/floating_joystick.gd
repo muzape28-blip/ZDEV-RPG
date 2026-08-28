@@ -52,6 +52,13 @@ func _release() -> void:
 	queue_redraw()
 
 
+# Dipanggil HUD saat app kehilangan fokus: touch-release bisa hilang
+# saat pause => stick nyangkut (bug ghost-input Android). [moonlight #1536]
+func release_all() -> void:
+	if pressed:
+		_release()
+
+
 func _draw() -> void:
 	if not pressed:
 		origin = _hint_origin()
