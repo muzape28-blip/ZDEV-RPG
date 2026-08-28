@@ -110,3 +110,41 @@ Budget device tetap: ±10-15k tris, tekstur 1-2K (kontrak M0).
 **Merah / jangan dulu:** CMU mocap (flag lisensi komersial), Cascadeur
 free-tier (non-komersial).
 Urutan eksekusi: setelah 6 poin M0 hijau + proxy humanoid (fase 1).
+
+## Sensus ARPG Open-Source (verifikasi langsung 2026-08-28, API GitHub + web)
+
+Daftar kandidat "harta karun" (masuk via ChatGPT) diverifikasi ulang satu
+per satu. Hasil: semua repo NYATA, tapi beberapa klaim ChatGPT salah —
+jangan telan mentah.
+
+| Project | Stack | Lisensi | Status | Nilai utk kita |
+|---|---|---|---|---|
+| **Reia** (Quaint-Studios) | Godot 4.6, GDScript + Rust GDExt, client/server | **AGPL-3.0** ⚠️ | AKTIF (push 2026-08) | 🔥 Arsitektur Godot-4 paling relevan: combat components (c_health, c_damage_event, s_damage_calculation), movement sync, ECS-lite. **JANGAN copy code** (AGPL menular) — belajar pola |
+| **Broken Seals** (Relintai) | GDScript di atas **Pandemonium** (fork Godot, bukan Godot 4) | MIT | Game tidur (2023), engine hidup | 🔥 Referensi spell/entity system; code Godot-3-era, port mahal |
+| **entity_spell_system** | C++ module Godot | MIT | 2023 | Pola Entity/Item/Loot/Aura/targeting utk M1+ |
+| **Veloren** | Rust, voxel | GPL-3.0 | Sangat aktif | Referensi arsitektur open-world+multiplayer; 1.2GB repo, jangan clone di sandbox |
+| **OpenMW** | C++ engine reimplement Morrowind | GPL-3.0 | Aktif | Bukti open-world RPG besar bisa Android; ref teknik large-world |
+| **openmw-android** | — | GPL-3.0 | URL asli = `xyzz/openmw-android` (bukan EvilRussia), tidur 2021 | Ref port Android engine besar |
+| **JDungeon3D** | Godot, GDScript | MIT | Kecil, 2024-08 | Contoh MMORPG Godot skala kecil |
+| **Source of Mana** | Godot 4, **2D** | MIT | Aktif (GitLab sourceofmana) | Ref netcode+Android, tapi 2D |
+| **FLARE** | C++/SDL2, 2D | GPL-3.0 | Aktif | Ref arsitektur ARPG engine, 2D |
+| **Solarus** | C++/Lua, 2D | GPLv3 | Pindah GitLab 2018 | 2D Zelda-like; skip |
+| **Ascension Adventure 2** | engine retro (Dubnium) | GPLv3+CC-BY-SA | 2017, selesai | **First-person** dungeon crawl — ChatGPT salah label; tidak relevan |
+| **GTA-VI-caliber** | Godot 4.6 | MIT (code), CC-BY-4.0 (aset) | Dibuat 2026-06, M0, 0 star | "AAA caliber" = aspirasi sendiri; isinya baru sandbox M0. Menarik cuma: mereka juga pakai pola AGENTS.md + tools/check.sh gate seperti kita |
+| Pandemonium/Voxelman | C++ Godot module | MIT | aktif/tidur | Ekosistem Relintai; tidak langsung dipakai |
+
+### Kesimpulan operasional
+1. **Tidak ada satu pun yang bisa dicomot langsung** ke stack kita
+   (Godot 4.7 + GDScript + armv7 + aset orisinal/CC). Bahasa/engine/lisensi
+   beda semua. Yang diambil = POLA & ARSITEKTUR.
+2. Ambil dari **Reia**: dekomposisi combat jadi komponen kecil
+   (sehat utk M1: health/damage/skill-exec terpisah, gampang dites).
+   Ambil dari **Broken Seals/entity_spell_system**: model
+   Spell/Aura/targeting/cooldown sbg data, bukan kode keras.
+   Ambil dari **OpenMW/Veloren** (nanti, fase open-world): streaming
+   sel dunia & LOD — BUKAN sekarang (dunia kita 300 m, aman tanpa streaming).
+3. Lisensi: AGPL/GPL = **baca saja, jangan salin**. Aset mereka jangan
+   masuk repo kita (ledger REFERENSI-GLTF tetap acuan).
+4. Celah yang ChatGPT sebut memang nyata: kombinasi OSS + 3D + ARPG +
+   Android + open-world + aset orisinal hampir tidak ada → posisi kita
+   (build sendiri di atas pola-pola di atas) justru masuk akal.
