@@ -235,3 +235,17 @@ Catatan bukti per build. Format entri:
 - Perf: fade rumput 16->11 m (padat tetap, fillrate turun).
 - Skill video diadopsi (ffmpeg-analyse-video-skill): frame 1 fps +
   timestamp overlay + baca batch; video berikutnya dianalisis lebih "utuh".
+
+## Entri #14 — 2026-08-28 · CHECKLIST WASPADA BASIC (riset pra-PAKET BASIC)
+
+Ranjau dasar yang belum pernah kita jamah + gard yang dipasang:
+1. Jitter/nyangkut dinding trimesh → kolisi primitif Box + max_slides 6 +
+   wall_min_slide 15° + slide_on_ceiling off [bugnet, r/godot].
+2. Meluncur di lereng saat idle → floor_stop_on_slope + snap 0.6 +
+   zero-velocity idle [bugnet slope].
+3. Ghost-input touch setelah pause → clear state di FOCUS_OUT [moonlight#1536].
+4. Presisi float jauh dari origin (>1.5-3 km jitter) → dunia kita 300 m =
+   AMAN kini; floating-origin = fase open-world nanti [bugnet, UE thread].
+5. Sky banding saat exposure rendah → pantau di device; viewport debanding
+   tersedia bila perlu [godot#74140].
+6. Collider silinder/irregular = vibrator → hanya primitif utk dinamis [r/godot].
