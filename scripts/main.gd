@@ -12,11 +12,11 @@ func _ready() -> void:
 # Matahari sky-shader terkunci ke arah DirectionalLight:
 # langit + cahaya = satu sumber kebenaran. [sky shader sun disc]
 func _setup_sun_sky() -> void:
-	var we := get_node_or_null("WorldEnvironment")
-	var sun := get_node_or_null("Sun")
+	var we := get_node_or_null("WorldEnvironment") as WorldEnvironment
+	var sun := get_node_or_null("Sun") as DirectionalLight3D
 	if we == null or sun == null:
 		return
-	var env := we.environment
+	var env: Environment = we.environment
 	if env == null or env.sky == null:
 		return
 	var sm := ShaderMaterial.new()
