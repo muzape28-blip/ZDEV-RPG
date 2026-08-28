@@ -205,3 +205,13 @@ Catatan bukti per build. Format entri:
   ```
   + gate lokal + push + UAT.
 - Dampak sekarang: run CI merah ⇒ APK ronde Arissa/siang BELUM kebentuk.
+
+## Entri #11 — 2026-08-28 · Utang #10 LUNAS, CI HIJAU
+
+- Fix 1: remove via AnimationLibrary (run merah #1).
+- Fix 2: add_animation JUGA via AnimationLibrary + guard has_animation
+  (run merah #2 — asumsi API yang salah, kini diverifikasi docs).
+- verify-local kini menyalin ASSETS ⇒ jalur loader karakter keuji lokal;
+  akar "lokal hijau tapi CI merah" teratasi.
+- Run 33142301761: PARSE+BOOT+EXPORT+UPLOAD HIJAU ⇒ APK ronde
+  Arissa+siang+pohon SIAP untuk UAT.
