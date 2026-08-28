@@ -215,3 +215,13 @@ Catatan bukti per build. Format entri:
   akar "lokal hijau tapi CI merah" teratasi.
 - Run 33142301761: PARSE+BOOT+EXPORT+UPLOAD HIJAU ⇒ APK ronde
   Arissa+siang+pohon SIAP untuk UAT.
+
+## Entri #12 — 2026-08-28 · MultiMesh COLOR_8 deprecated; divergensi lokal≠CI
+
+- CI merah #3: `MultiMesh.COLOR_8BIT` tak ada di build resmi 4.7
+  (konstanta DEPRECATED; build resmi = deprecated=no).
+- Akar divergensi "lokal hijau CI merah": engine source build lokal
+  memuat API deprecated; CI pakai binary resmi tanpa deprecated.
+- Fix: `use_colors = true` (docs 4.7).
+- Aturan baru: rebuild engine lokal kelak wajib flag `deprecated=no`
+  agar gerbang lokal == perilaku resmi.

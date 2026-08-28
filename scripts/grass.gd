@@ -41,7 +41,7 @@ func rebuild(d: int) -> void:
 	var count := BASE_COUNT * (1 if d == 1 else 2)
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.color_format = MultiMesh.COLOR_8BIT
+	mm.use_colors = true  # 4.7: tidak ada enum COLOR_8BIT (pelajaran CI #3)
 	mm.instance_count = count
 	mm.mesh = _card_mesh()
 	var rng := RandomNumberGenerator.new()
