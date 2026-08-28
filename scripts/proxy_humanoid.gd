@@ -49,9 +49,6 @@ func _load_and_setup_character() -> void:
 		return
 	var inst := char_scene.instantiate()
 	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
-	# Model Mixamo menghadap +Z; logika kita -Z forward.
-	# Tanpa flip: moonwalk + kamera terasa "di depan" (UAT video).
-	inst.rotation.y = PI
 	add_child(inst)
 	model_node = inst
 	anim_player = _find_animation_player(inst)
@@ -168,5 +165,5 @@ func _physics_process(dt: float) -> void:
 		var h_f: float = ter.get_height_at(g.x + fwd.x * 0.6, g.z + fwd.z * 0.6)
 		var h_r: float = ter.get_height_at(g.x + right.x * 0.6, g.z + right.z * 0.6)
 		position.y = lerp(position.y, h_c, 12.0 * dt)
-		rotation.x = lerp(rotation.x, clampf((h_c - h_f) * 0.35, -0.18, 0.18), 8.0 * dt)
-		rotation.z = lerp(rotation.z, clampf((h_r - h_c) * 0.35, -0.18, 0.18), 8.0 * dt)
+		rotation.x = lerp(rotation.x, clampf((h_c - h_f) * 0.15, -0.12, 0.12), 8.0 * dt)
+		rotation.z = lerp(rotation.z, clampf((h_r - h_c) * 0.15, -0.12, 0.12), 8.0 * dt)

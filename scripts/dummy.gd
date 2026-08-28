@@ -33,7 +33,7 @@ func _ready() -> void:
 	col.shape = sh
 	col.position = Vector3(0.0, 1.3, 0.0)
 	add_child(col)
-	position = Vector3(0.0, 0.0, -8.0)
+	position = Vector3(0.0, 0.0, 8.0)
 
 
 func _physics_process(dt: float) -> void:

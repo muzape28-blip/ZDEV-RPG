@@ -171,6 +171,10 @@ func _input(event: InputEvent) -> void:
 	var vp_w := get_viewport().get_visible_rect().size.x
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			# jangan catat sentuhan tombol: jempol-di-tombol + jari-drag
+			# sebelumnya kebaca PINCH => drag jadi zoom (bug UAT)
+			if _over_button(event.position):
+				return
 			touch_pos[event.index] = event.position
 			if touch_pos.size() == 2:
 				# PINCH ZOOM mulai: batalkan yaw-drag

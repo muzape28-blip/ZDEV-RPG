@@ -38,8 +38,9 @@ func _physics_process(dt: float) -> void:
 	if target == null:
 		return
 	if cam != null:
-		# dist = jarak horizontal; tinggi proporsional (rasio 0.63)
-		cam.position = Vector3(0.0, dist * 0.63, dist)
+		# kamera di BELAKANG: konvensi hadap kita +Z = arah jalan,
+		# jadi offset kamera harus -Z (akar bug "kamera di depan")
+		cam.position = Vector3(0.0, dist * 0.63, -dist)
 
 	var vel: Vector3 = target.velocity
 	var speed := Vector2(vel.x, vel.z).length()

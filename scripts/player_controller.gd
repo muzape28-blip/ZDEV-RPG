@@ -42,7 +42,7 @@ func request_dodge() -> void:
 		var cyaw: float = 0.0
 		if pivot != null:
 			cyaw = pivot.rotation.y
-		var fwd := Vector3(-sin(cyaw), 0.0, -cos(cyaw))
+		var fwd := Vector3(sin(cyaw), 0.0, cos(cyaw))
 		var rgt := Vector3(-fwd.z, 0.0, fwd.x)
 		var lat := dir.dot(rgt)
 		var lon := dir.dot(fwd)
@@ -135,10 +135,12 @@ func _move_direction() -> Vector3:
 		return Vector3.ZERO
 	# Gerakan RELATIF kamera: joystick atas selalu menjauhi kamera,
 	# berapa pun yaw orbitnya.
+	var pivot := get_node_or_null("CameraPivot")
 	var cyaw := 0.0
-	if cam != null and cam.has_method("get_yaw"):
-		cyaw = cam.get_yaw()
-	var fwd := Vector3(-sin(cyaw), 0.0, -cos(cyaw))
+	if pivot != null and pivot.has_method("get_yaw"):
+		cyaw = pivot.get_yaw()
+	# hadap kita +Z = arah jalan => fwd = +Z di-yaw orbit
+	var fwd := Vector3(sin(cyaw), 0.0, cos(cyaw))
 	var right := Vector3(-fwd.z, 0.0, fwd.x)
 	return (fwd * -move_input.y + right * move_input.x).normalized()
 
