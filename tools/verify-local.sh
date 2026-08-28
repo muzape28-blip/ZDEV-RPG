@@ -22,6 +22,8 @@ T="$ROOT/.cache/projtest"
 rm -rf "$T" && mkdir -p "$T"
 cp -r "$ROOT/project.godot" "$ROOT/export_presets.cfg" "$ROOT/scenes" "$ROOT/scripts" "$T/"
 [ -d "$ROOT/shaders" ] && cp -r "$ROOT/shaders" "$T/"
+# aset ikut supaya jalur loader karakter beneran keuji (pelajaran miss CI)
+[ -d "$ROOT/ASSETS" ] && cp -r "$ROOT/ASSETS" "$T/"
 cp "$BIN" "$T/"
 cd "$T" || exit 2
 FAIL=0

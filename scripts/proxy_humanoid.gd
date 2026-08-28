@@ -41,11 +41,13 @@ func _load_and_setup_character() -> void:
 	anim_player = _find_animation_player(inst)
 	if anim_player == null:
 		return
+	var lib := anim_player.get_animation_library("")
+	if lib == null:
+		return
 
 	# normalisasi animasi bawaan jadi "Idle"
 	# (Godot 4: remove/add hidup di AnimationLibrary, bukan AnimationPlayer —
-	#  pelajaran CI merah run terakhir)
-	var lib := anim_player.get_animation_library("")
+	#  pelajaran CI merah dua run beruntun)
 	var names: Array = anim_player.get_animation_list()
 	var first := true
 	for n in names:
@@ -71,8 +73,8 @@ func _load_and_setup_character() -> void:
 		var tp := _find_animation_player(tmp)
 		if tp != null:
 			var tl: Array = tp.get_animation_list()
-			if tl.size() > 0:
-				anim_player.add_animation(alias, tp.get_animation(tl[0]))
+			if tl.size() > 0 and not lib.has_animation(alias):
+				lib.add_animation(alias, tp.get_animation(tl[0]))
 		tmp.free()
 
 	if anim_player.has_animation("Idle"):
