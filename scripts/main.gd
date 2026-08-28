@@ -59,3 +59,4 @@ func _diag_hud() -> void:
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lay.add_child(lbl)
 	add_child(lay)
+# trigger eye
