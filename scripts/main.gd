@@ -21,7 +21,7 @@ func _setup_sun_sky() -> void:
 		return
 	var sm := ShaderMaterial.new()
 	sm.shader = load("res://shaders/sky_sun.gdshader")
-	env.sky.material = sm
+	env.sky.sky_material = sm  # API resmi: Sky.sky_material (bukan .material, pelajaran CI #4)
 	sm.set_shader_parameter("sun_dir", sun.global_transform.basis.z)
 
 

@@ -249,3 +249,17 @@ Ranjau dasar yang belum pernah kita jamah + gard yang dipasang:
 5. Sky banding saat exposure rendah → pantau di device; viewport debanding
    tersedia bila perlu [godot#74140].
 6. Collider silinder/irregular = vibrator → hanya primitif utk dinamis [r/godot].
+
+## Entri #15 — 2026-08-28 · DUA PELAJARAN CI (build lokal vs resmi)
+
+Engine lokal = source build custom; build CI = official 4.7.2. Dua selisih
+ketangkep CI, lolos lokal:
+1. `var env := we.environment` (we hasil get_node_or_null = Node) => official:
+   "Cannot infer the type of env". Fix: cast eksplisit
+   `as WorldEnvironment` / `as DirectionalLight3D` + `var env: Environment`.
+   Pelajaran: jangan `:=` dari rantai property di variabel Node longgar.
+2. `env.sky.material = ShaderMaterial` => official: "Invalid assignment ...
+   'material' ... on base 'Sky'". API resmi = `Sky.sky_material`.
+   Alias `.material` cuma ada di build lokal (deprecated).
+Status boot gate setelah fix: menunggu CI. Pola: lokal HIJAU belum tentu
+resmi HIJAU; boot-check headless di CI = hakim runtime.
