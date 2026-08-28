@@ -3,7 +3,7 @@ extends Node3D
 # KAMERA v2 — yaw bebas drag, pitch clamp, PINCH dolly (4-9 m),
 # RECENTER otomatis 0.8 s saat idle+lepas, look-at dada karakter.
 # Movement karakter relatif kamera dihitung di player_controller via get_yaw().
-const DIST_DEFAULT := 5.2
+const DIST_DEFAULT := 4.4
 const DIST_MIN := 4.0
 const DIST_MAX := 9.0
 const RECENTER_DELAY := 0.8
@@ -19,6 +19,8 @@ var cam: Camera3D = null
 func _ready() -> void:
 	target = get_parent() as Node3D
 	cam = get_node_or_null("Camera3D")
+	if cam != null:
+		cam.fov = 65.0  # framing referensi: char ~33-35% tinggi layar
 
 
 func get_yaw() -> float:
