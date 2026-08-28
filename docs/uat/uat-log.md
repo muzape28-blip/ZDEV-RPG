@@ -225,3 +225,13 @@ Catatan bukti per build. Format entri:
 - Fix: `use_colors = true` (docs 4.7).
 - Aturan baru: rebuild engine lokal kelak wajib flag `deprecated=no`
   agar gerbang lokal == perilaku resmi.
+
+## Entri #13 — 2026-08-28 · SPIN BUG + skill video
+
+- Gejala (video NEW_UAT): jalan => kamera muter-muter, terasa jalan di tempat.
+- Akar: get_yaw() pakai global_rotation.y => rotasi player masuk ke referensi
+  movement => feedback loop. Klasik (Cinemachine "binding mode", TDM mod).
+- Fix: get_yaw() = rotation.y (orbit-lokal). + presence: DIST_DEFAULT 5.2.
+- Perf: fade rumput 16->11 m (padat tetap, fillrate turun).
+- Skill video diadopsi (ffmpeg-analyse-video-skill): frame 1 fps +
+  timestamp overlay + baca batch; video berikutnya dianalisis lebih "utuh".

@@ -3,7 +3,7 @@ extends Node3D
 # KAMERA v2 — yaw bebas drag, pitch clamp, PINCH dolly (4-9 m),
 # RECENTER otomatis 0.8 s saat idle+lepas, look-at dada karakter.
 # Movement karakter relatif kamera dihitung di player_controller via get_yaw().
-const DIST_DEFAULT := 6.2
+const DIST_DEFAULT := 5.2
 const DIST_MIN := 4.0
 const DIST_MAX := 9.0
 const RECENTER_DELAY := 0.8
@@ -22,7 +22,10 @@ func _ready() -> void:
 
 
 func get_yaw() -> float:
-	return global_rotation.y
+	# ORBIT-LOCAL yaw saja (bukan global!) — global menyuntikkan rotasi
+	# player ke referensi movement => feedback loop "muter-muter"
+	# (pelajaran UAT video + thread Cinemachine/TDM).
+	return rotation.y
 
 
 func adjust_dist(d: float) -> void:
@@ -33,8 +36,8 @@ func _physics_process(dt: float) -> void:
 	if target == null:
 		return
 	if cam != null:
-		var s := dist / DIST_DEFAULT
-		cam.position = Vector3(0.0, 3.9 * s, 6.2 * s)
+		# dist = jarak horizontal; tinggi proporsional (rasio 0.63)
+		cam.position = Vector3(0.0, dist * 0.63, dist)
 
 	var vel: Vector3 = target.velocity
 	var speed := Vector2(vel.x, vel.z).length()
