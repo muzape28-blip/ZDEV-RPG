@@ -163,9 +163,8 @@ func _on_chip_grass(event: InputEvent) -> void:
 
 
 # ---- INPUT LAYAR: satu pintu, kanal terbukti ----
-var touch_pos: Dictionary = {}
-var zoom_mode := false
-var last_pinch_d := 0.0
+# PAKET v5: PINCH-ZOOM DIPENSIUNKAN permanen (sumber bug berulang:
+# pinch-leak, drag-jadi-zoom). Jarak kamera konstan = framing referensi.
 
 
 func _input(event: InputEvent) -> void:
@@ -176,38 +175,23 @@ func _input(event: InputEvent) -> void:
 			# sebelumnya kebaca PINCH => drag jadi zoom (bug UAT)
 			if _over_button(event.position):
 				return
-			touch_pos[event.index] = event.position
-			if touch_pos.size() == 2:
-				# PINCH ZOOM mulai: batalkan yaw-drag
-				zoom_mode = true
-				cam_drag_id = -1
-				last_pinch_d = 0.0
-				if pivot != null:
-					pivot.dragging = false
-			elif not _over_button(event.position) and event.position.x > vp_w * 0.5 and cam_drag_id == -1:
+			# v5: jari kedua DIABAIKAN (zoom pensiun) — bukan pinch,
+			# bukan drag kamera kedua.
+			if cam_drag_id != -1:
+				return
+			if event.position.x > vp_w * 0.5:
 				cam_drag_id = event.index
 				cam_last_x = event.position.x
 				cam_last_y = event.position.y
 				if pivot != null:
 					pivot.dragging = true
 		else:
-			touch_pos.erase(event.index)
 			if event.index == cam_drag_id:
 				cam_drag_id = -1
 				if pivot != null:
 					pivot.dragging = false
-			if touch_pos.size() < 2:
-				zoom_mode = false
-				last_pinch_d = 0.0
 	elif event is InputEventScreenDrag:
-		touch_pos[event.index] = event.position
-		if zoom_mode and touch_pos.size() >= 2:
-			var pts: Array = touch_pos.values()
-			var d: float = pts[0].distance_to(pts[1])
-			if last_pinch_d > 0.0 and pivot != null:
-				pivot.adjust_dist((last_pinch_d - d) * 0.02)
-			last_pinch_d = d
-		elif event.index == cam_drag_id:
+		if event.index == cam_drag_id:
 			var drag := event as InputEventScreenDrag
 			var dx := drag.position.x - cam_last_x
 			var dy := drag.position.y - cam_last_y
@@ -230,9 +214,6 @@ func _over_button(p: Vector2) -> bool:
 # Bersihkan semua state sentuh saat kehilangan fokus. [ghost-input Android]
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
-		touch_pos.clear()
-		zoom_mode = false
-		last_pinch_d = 0.0
 		cam_drag_id = -1
 		if pivot != null:
 			pivot.dragging = false

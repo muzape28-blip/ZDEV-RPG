@@ -266,3 +266,42 @@ PARSE + BOOT + export APK lolos). Pola: lokal HIJAU belum tentu resmi
 HIJAU; boot-check headless di CI = hakim runtime. Emulator-eye di build
 yang sama: telemetri TEL hidup 57 baris tanpa error = logika sehat;
 screenshot masih hitam (keterbatasan emu, visual = lab device).
+
+## Entri #16 — 2026-08-29 · PAKET v5 "RASA COMBAT" (12 item, approve user)
+
+Status per item (jujur): IMPLEMENTED + LOCALLY VERIFIED (parse+boot lokal);
+CI resmi & DEVICE = menunggu.
+
+1. Tanah NaN-guard + palet pasir 3-lapis (albedo linear ref 0.4, polycount).
+2. Spawn y=0.6 (anti-degenerat) + DIAG live on-screen (t/y/fl/fps).
+3. Pinch-zoom OFF permanen; jari kedua diabaikan; adjust_dist dihapus.
+4. Recenter idle-only dipertahankan (sudah sesuai desain).
+5. Strafe hybrid: band jalan + stick samping/belakang => Standing Walk
+   Left/right/Back + badan lerp hadap kamera (10/s); lari/depan = hadap arah.
+6. Pohon 0.8-1.4 -> 1.1-1.8 (landmark padang datar).
+7. Cloak_Geo visible=false (node jubah terpisah di FBX; bukan free, aman skin).
+8. Strip translasi X/Z track Hips semua anim jahitan = fix "geser balik
+   pasca-dodge" (klip dodge Mixamo bawa root-motion; badan+anim gerak dobel,
+   tulang balik nol => snap). Kalau klip in-place = no-op.
+9. Dolly-out kamera: dodge semua arah (naik 6/s), mundur (approach*0.5),
+   samping setelah 0.4 dtk (naik pelan); maks +2.2 m; turun 2/s.
+10. Dodge belakang serong: sektor back = lon<0 & |lon|>0.35|lat|; vektor
+    dash tetap ikut stick.
+11. dodge_block_t=2.0 pasca-dodge; kamera skip recenter selama itu.
+12. dash 15/0.26 -> 17/0.30 (~5.1 m) + was_dash: move_smooth=dash_dir saat
+    transisi (fallback smooth).
+
+Temuan samping (jangan lupa): engine lokal custom TIDAK punya importer FBX
+=> verifikasi lokal karakter selalu fallback ke Jules glTF; Arissa hanya
+teruji di CI resmi + device. Boot lokal = boot logika, bukan boot Arissa.
+
+### Addendum #16 — pelajaran CI #5 (2bf6342 merah -> fix)
+- Duplicate `func _process` di main.gd (DIAG live nambah _process kedua;
+  TEL udah punya) => parse resmi merah. LOKAL LEWAT (analizer build custom
+  beda ketat) => pelajaran berulang: CI resmi = hakim, lokal = saringan awal.
+- Sisa `pv.dist` di print TEL (dist dihapus kamera v3) => bakal runtime
+  error; ikut difix jadi `pv.extra`.
+- Pelajaran CI #6: Animation.TRACK_POSITION = alias deprecated (build lokal
+  punya, resmi 4.7 tidak; nama resmi TYPE_POSITION_3D). Proxy ga ikut parse
+  gate => merahnya baru ketahuan di boot. Usulan: tambah proxy_humanoid/
+  dummy/terrain_generator/grass ke PARSE gate (file workflow di-update user).

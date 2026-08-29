@@ -51,6 +51,7 @@ script = ExtResource("7_grass")
 script = ExtResource("4_spawner")
 
 [node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 script = ExtResource("2_player")
 
 [node name="CollisionShape" type="CollisionShape3D" parent="Player"]

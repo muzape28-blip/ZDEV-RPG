@@ -56,24 +56,45 @@ func _process(delta: float) -> void:
 		var pv := get_node_or_null("Player/CameraPivot")
 		if p != null and pv != null:
 			var v: Vector3 = p.velocity
-			print("TEL stick=(%.2f,%.2f) vel=(%.2f,%.2f) face=%.2f camY=%.2f camP=%.2f dist=%.2f" % [
+			print("TEL stick=(%.2f,%.2f) vel=(%.2f,%.2f) face=%.2f camY=%.2f camP=%.2f extra=%.2f" % [
 				p.move_input.x, p.move_input.y, v.x, v.z,
-				p.rotation.y, pv.rotation.y, pv.rotation.x, pv.dist])
+				p.rotation.y, pv.rotation.y, pv.rotation.x, pv.extra])
+
+	# DIAG LIVE on-screen (mata device, pengganti logcat)
+	if diag_lbl != null:
+		diag_acc += delta
+		if diag_acc >= 0.25:
+			diag_acc = 0.0
+			var y := 0.0
+			var fl := 0
+			if diag_player != null:
+				y = diag_player.global_position.y
+				if diag_player.has_method("is_on_floor") and diag_player.is_on_floor():
+					fl = 1
+			diag_lbl.text = "t=%05.1f y=%.2f fl=%d fps=%d" % [
+				Time.get_ticks_msec() / 1000.0, y, fl, Engine.get_frames_per_second()]
 
 
+var diag_lbl: Label = null
+var diag_player: Node = null
+var diag_acc := 0.0
+
+
+# v5: DIAG LIVE on-screen (mata kita di device, pengganti logcat):
+# t=detik-sejak-boot, y=tinggi player, fl=on_floor, fps. Kecil, pojok
+# kiri-atas (zona mati jempol), update 4x/detik biar nggak noise.
 func _diag_hud() -> void:
-	var scr = load("res://scripts/hud.gd")
-	var hud_root := get_node_or_null("HUD/HudRoot")
-	var n_child := hud_root.get_child_count() if hud_root != null else -1
-	var pivot := get_node_or_null("Player/CameraPivot")
+	diag_player = get_node_or_null("Player")
 	var lay := CanvasLayer.new()
 	var lbl := Label.new()
-	lbl.text = "DIAG hud=%s anak=%d pivot=%s" % [
-		str(scr != null), n_child, str(pivot != null)]
-	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.text = "DIAG ..."
+	lbl.add_theme_font_size_override("font_size", 15)
 	lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2, 1.0))
-	lbl.position = Vector2(40.0, 90.0)
+	lbl.position = Vector2(12.0, 40.0)
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lay.add_child(lbl)
 	add_child(lay)
+	diag_lbl = lbl
+
+
 # trigger eye
