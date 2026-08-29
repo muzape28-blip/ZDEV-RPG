@@ -35,3 +35,11 @@ release-assets & raw.githubusercontent. Kanal kerja: api.github.com (base64
 
 Konsekuensi desain: SHOGUN = kandidat boss (dipakai apa adanya).
 Karakter yang akan kita MODIF = harus dari sumber CC0/CC-BY (bukan pack TORTOR).
+
+## LEDGER LISENSI RAMBUT (2026-08-29)
+- **Ponytail Hair for Character** — Marc Sawyer (@whitewashstudio), Sketchfab
+  [8ddc5c1](https://sketchfab.com/3d-models/ponytail-hair-for-character-8ddc5c1c6cda49bc80c9f3a675b0a6c4)
+  Lisensi **CC-BY 4.0** => wajib kredit "Marc Sawyer" di kredit game/docs.
+  File: ASSETS/ARRISA/Hair.obj (mtl+tekstur menyusul; warna kini dari kode).
+  Catatan teknis: satuan OBJ 10x meter (skala 0.1 di kode); 15.3k verts =
+  berat utk Mali-G57 — pantau DIAG fps; decimate Blender bila perlu.
