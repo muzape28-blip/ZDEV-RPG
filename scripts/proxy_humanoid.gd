@@ -128,7 +128,9 @@ func _strip_hips_xz(an: Animation) -> void:
 	if an == null:
 		return
 	for ti in range(an.get_track_count()):
-		if an.track_get_type(ti) != Animation.TRACK_POSITION:
+		# API resmi 4.7: TYPE_POSITION_3D (TRACK_POSITION = alias deprecated
+		# yang cuma ada di build lokal — pelajaran CI #6)
+		if an.track_get_type(ti) != Animation.TYPE_POSITION_3D:
 			continue
 		if str(an.track_get_path(ti)).find("Hips") == -1:
 			continue

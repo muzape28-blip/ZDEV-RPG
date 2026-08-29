@@ -301,3 +301,7 @@ teruji di CI resmi + device. Boot lokal = boot logika, bukan boot Arissa.
   beda ketat) => pelajaran berulang: CI resmi = hakim, lokal = saringan awal.
 - Sisa `pv.dist` di print TEL (dist dihapus kamera v3) => bakal runtime
   error; ikut difix jadi `pv.extra`.
+- Pelajaran CI #6: Animation.TRACK_POSITION = alias deprecated (build lokal
+  punya, resmi 4.7 tidak; nama resmi TYPE_POSITION_3D). Proxy ga ikut parse
+  gate => merahnya baru ketahuan di boot. Usulan: tambah proxy_humanoid/
+  dummy/terrain_generator/grass ke PARSE gate (file workflow di-update user).
