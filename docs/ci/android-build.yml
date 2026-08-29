@@ -68,7 +68,7 @@ jobs:
       - name: PARSE-CHECK semua GDScript (gerbang permanen)
         run: |
           set -e
-          for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner; do
+          for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner terrain_generator grass proxy_humanoid dummy; do
             echo "-- check $s"
             "$GODOT_BIN" --headless --path . --check-only --script "res://scripts/$s.gd"
           done
