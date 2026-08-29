@@ -118,11 +118,15 @@ func _build_terrain() -> void:
 
 	# PADANG BASIC: kolisi Box sederhana = kelas bug "nyangkut/tenggelam"
 	# musnah; primitif > heightmap/trimesh untuk fase basic (riset bug dasar).
+	# v7 ANTI-TUNNELING: box TEBAL 40 m (puncak tetap y=0). Frame pertama di
+	# device punya delta raksasa (jank startup) => vy besar => box tipis 2 m
+	# dulu ketembus (tunneling, UAT "char di bawah floor"). 40 m = mustahil
+	# ketembus bahkan di vy clamp -12 & delta 0.1 s (langkah maks 1.2 m).
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()
 	var box := BoxShape3D.new()
-	box.size = Vector3(size, 2.0, size)
+	box.size = Vector3(size, 40.0, size)
 	col.shape = box
-	col.position = Vector3(0.0, -1.0, 0.0)
+	col.position = Vector3(0.0, -20.0, 0.0)
 	body.add_child(col)
 	add_child(body)

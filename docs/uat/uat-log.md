@@ -305,3 +305,21 @@ teruji di CI resmi + device. Boot lokal = boot logika, bukan boot Arissa.
   punya, resmi 4.7 tidak; nama resmi TYPE_POSITION_3D). Proxy ga ikut parse
   gate => merahnya baru ketahuan di boot. Usulan: tambah proxy_humanoid/
   dummy/terrain_generator/grass ke PARSE gate (file workflow di-update user).
+
+## Entri #17 — 2026-08-29 · PAKET v7 (GAS user, setelah UAT v5 + rambut)
+
+1. ANTI-TUNNELING 3 lapis (akar bug "char di bawah floor", terbukti via
+   repro lokal 12 FPS: delta jank 0.5 s => vy*delta 6 m nembus box 2 m):
+   box 40 m + clamp vy -12 + safety-net snap y<0 => y=0.02 (1 frame,
+   fase padang datar; cabut bila open-world punya jurang). Setelah fix:
+   repro 12 FPS y tak pernah < 0.02. DEVICE VERIFIED: menunggu.
+2. Rambut ponytail CC-BY Marc Sawyer: mount dr AABB (skala .1, y 1.78),
+   material deterministik (mtl belum dipush), 4 guard. commit 33097a7.
+3. Kamera v4: tinggi KUNCI 2.772; mundur/dodge = jarak; samping = tracking
+   yaw omega=-v_lat/d *0.9 setelah 0.4 dtk, pause saat drag.
+4. Grace input 0.8 dtk (anti ghost-stick startup).
+5. DIAG v2: + st=(x,y) anim o= => self-diagnosing UAT.
+6. Strafe spek user: run hanya depan; samping/belakang selalu Standing Walk
+   (cap 3.2); badan hadap kamera 10/s.
+7. Anti-mobil v2: run-depan blend 30/s + yaw arah mentah 45/s.
+8. Anti-stuck-ngangkang: watchdog one_shot 2.5 dtk + clear saat anim habis.

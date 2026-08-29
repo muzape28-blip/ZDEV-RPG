@@ -1,12 +1,11 @@
 extends Node3D
 
-# KAMERA v3 (PAKET v5) — yaw bebas drag, pitch clamp, zoom PINCH DIPENSIUNKAN
-# (jarak konstan = framing referensi), RECENTER hanya saat idle & tidak pasca-
-# dodge, DOLLY-OUT otomatis: dodge arah mana pun (respons cepet), jalan mundur
-# (respons cepet), jalan menyamping setelah bertahan ~0.4 dtk (naik pelan).
-# Movement karakter relatif kamera dihitung di player_controller via get_yaw().
+# KAMERA v4 (PAKET v7) — tinggi DIKUNCI (nggak ada "naik" = zoom terselubung);
+# mundur/dodge = jarak horizontal; menyamping = TRACKING YAW (dunia geser).
+# yaw bebas drag, pitch clamp, RECENTER hanya idle & bukan pasca-dodge.
 const DIST_DEFAULT := 4.4
 const DIST_EXTRA_MAX := 2.2
+const CAM_H := 2.772  # 4.4 * 0.63 — tinggi kunci, TIDAK berubah lagi
 const RECENTER_DELAY := 0.8
 const RECENTER_SPEED := 4.0
 
@@ -38,33 +37,36 @@ func _physics_process(dt: float) -> void:
 	if target == null:
 		return
 
-	# ---- DOLLY-OUT: urgensi dari gerakan "melintang" thd pandangan ----
+	# ---- DOLLY MUNDUR: hanya pendekatan (mundur) & dodge; TINGGI TETAP ----
 	var fwd := Vector3(sin(rotation.y), 0.0, cos(rotation.y))
 	var rgt := Vector3(-fwd.z, 0.0, fwd.x)
 	var hvel := Vector3(target.velocity.x, 0.0, target.velocity.z)
 	var approach := -hvel.dot(fwd)          # mundur = positif
-	var lateral := absf(hvel.dot(rgt))      # menyamping
+	var lateral := hvel.dot(rgt)            # menyamping, bertanda
 	var dv = target.get("dash_timer")       # dodge aktif?
 	var dashing := dv != null and float(dv) > 0.0
 	var urg := 0.0
 	if dashing:
 		urg = 8.0                            # dodge arah mana pun: napas langsung
 	urg = maxf(urg, approach * 0.5)          # jalan mundur
-	if lateral > 1.5 and not dashing:
-		lat_hold += dt                       # "beberapa langkah" samping
-	else:
-		lat_hold = 0.0
-	if lat_hold > 0.4:
-		urg = maxf(urg, lateral * 0.45)
 	var target_extra := clampf(urg, 0.0, DIST_EXTRA_MAX)
 	var rate := 6.0 if target_extra > extra else 2.0  # naik cepet, turun pelan
 	extra = lerpf(extra, target_extra, clampf(rate * dt, 0.0, 1.0))
 	var dist_eff := DIST_DEFAULT + extra
 
+	# v7 TRACKING YAW: menyamping bertahan 0.4 dtk => kamera ngorbit ngikut
+	# (omega = -v_lat / d, x0.9 biar halus) => char tetap tengah, dunia geser.
+	# BUKAN nambah jarak (itu = zoom-out auto yang dipensiunkan). Pause saat drag.
+	if absf(lateral) > 1.5 and not dashing and not dragging:
+		lat_hold += dt
+	else:
+		lat_hold = 0.0
+	if lat_hold > 0.4:
+		rotation.y -= (lateral / dist_eff) * dt * 0.9
+
 	if cam != null:
-		# kamera di BELAKANG: konvensi hadap kita +Z = arah jalan,
-		# jadi offset kamera harus -Z (akar bug "kamera di depan")
-		cam.position = Vector3(0.0, dist_eff * 0.63, -dist_eff)
+		# kamera di BELAKANG, TINGGI KUNCI CAM_H (konvensi hadap +Z)
+		cam.position = Vector3(0.0, CAM_H, -dist_eff)
 
 	var speed := Vector2(target.velocity.x, target.velocity.z).length()
 	if not dragging and speed < 0.15:

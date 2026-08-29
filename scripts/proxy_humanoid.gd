@@ -8,6 +8,7 @@ var anim_player: AnimationPlayer
 var model_node: Node3D
 var current_anim := "Idle"
 var one_shot_active := false
+var one_shot_t := 0.0  # v7 watchdog anti-stuck-ngangkang
 
 
 # dipanggil player_controller saat dodge berarah
@@ -15,6 +16,7 @@ func play_one_shot(anim: String) -> void:
 	if anim_player != null and anim != "" and anim_player.has_animation(anim):
 		anim_player.play(anim, 0.08)
 		one_shot_active = true
+		one_shot_t = 0.0
 
 
 func _ready() -> void:
@@ -233,10 +235,13 @@ func _physics_process(dt: float) -> void:
 		if anim_player != null and anim_player.has_animation(String(sa)):
 			target_anim = String(sa)
 
-	# one-shot (dodge)优先: jangan ditimpa switching sampai selesai
+	# one-shot (dodge): jangan ditimpa switching sampai selesai.
+	# v7 ANTI-STUCK-NGANGKANG berlapis: (1) clear saat anim berakhir,
+	# (2) watchdog 2.5 dtk paksa clear bila state nyangkut di device jank.
 	var skip_switch := false
 	if one_shot_active:
-		if anim_player != null and anim_player.is_playing():
+		one_shot_t += dt
+		if anim_player != null and anim_player.is_playing() and one_shot_t < 2.5:
 			skip_switch = true
 		else:
 			one_shot_active = false
