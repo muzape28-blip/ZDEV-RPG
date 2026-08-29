@@ -5,6 +5,7 @@ extends Node3D
 # (dilarang r<10 m) + 1 monolit reruntuhan ±80 m.
 # MultiMesh per kelas = 3 draw call; collision hanya besar+sedang.
 @export var seed_value := 7
+@export var spawn_trees := false  # default low-end: landmark batu, tanpa clutter GLB
 
 const CLUSTER_ANGLES := [40.0, 160.0, 280.0]
 const BIG_ANGLES := [90.0, 210.0, 330.0]
@@ -22,7 +23,8 @@ func _ready() -> void:
 	_spawn_clusters(rng)
 	_spawn_big_rocks(rng)
 	_spawn_monolith()
-	_spawn_trees(rng)
+	if spawn_trees:
+		_spawn_trees(rng)
 
 
 func _rock_mesh() -> SphereMesh:

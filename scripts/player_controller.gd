@@ -40,12 +40,19 @@ func request_dodge() -> void:
 	var alias := ""
 	if dir.length_squared() < 0.01:
 		# tanpa input: backstep dengan animasi DodgeBack
-		var cam := get_node_or_null("CameraPivot/Camera3D")
-		if cam != null:
-			dir = -cam.global_transform.basis.z
+		var cam_node: Camera3D = get_node_or_null("CameraPivot/CameraArm/Camera3D") as Camera3D
+		if cam_node == null:
+			cam_node = get_node_or_null("CameraPivot/Camera3D") as Camera3D
+		if cam_node != null:
+			dir = cam_node.global_position - global_position
+			dir.y = 0.0
+		if dir.length_squared() > 0.01:
+			dir = dir.normalized()
 		else:
-			dir = -global_transform.basis.z
+			# Fallback: Node3D forward proyek ini adalah -basis.z.
+			dir = global_transform.basis.z
 		dir.y = 0.0
+
 		alias = "DodgeBack"
 	else:
 		# arah stick relatif KAMERA (bukan hadap karakter — karakter selalu

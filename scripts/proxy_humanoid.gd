@@ -9,6 +9,9 @@ var model_node: Node3D
 var current_anim := "Idle"
 var one_shot_active := false
 var one_shot_t := 0.0  # v7 watchdog anti-stuck-ngangkang
+var fallback_node: Node3D = null
+var fallback_dodge_t := 0.0
+var fallback_dodge_sign := 1.0
 
 
 # dipanggil player_controller saat dodge berarah
@@ -17,10 +20,50 @@ func play_one_shot(anim: String) -> void:
 		anim_player.play(anim, 0.08)
 		one_shot_active = true
 		one_shot_t = 0.0
+	if fallback_node != null:
+		fallback_dodge_t = 0.22
+		fallback_dodge_sign = -1.0 if anim.contains("Left") else 1.0
 
 
 func _ready() -> void:
 	_load_and_setup_character()
+
+
+func _build_fallback_humanoid() -> void:
+	if fallback_node != null:
+		return
+	fallback_node = Node3D.new()
+	fallback_node.name = "FallbackHumanoid"
+	add_child(fallback_node)
+	var skin := StandardMaterial3D.new()
+	skin.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	skin.albedo_color = Color(0.74, 0.46, 0.30)
+	var cloth := StandardMaterial3D.new()
+	cloth.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cloth.albedo_color = Color(0.08, 0.16, 0.25)
+	var metal := StandardMaterial3D.new()
+	metal.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	metal.albedo_color = Color(0.45, 0.56, 0.64)
+	_add_fallback_capsule("Body", Vector3(0.34, 0.72, 0.22), Vector3(0.0, 1.05, 0.0), cloth)
+	_add_fallback_capsule("Head", Vector3(0.23, 0.28, 0.23), Vector3(0.0, 1.92, 0.0), skin)
+	_add_fallback_capsule("LeftArm", Vector3(0.10, 0.52, 0.10), Vector3(-0.42, 1.10, 0.0), cloth)
+	_add_fallback_capsule("RightArm", Vector3(0.10, 0.52, 0.10), Vector3(0.42, 1.10, 0.0), cloth)
+	_add_fallback_capsule("LeftLeg", Vector3(0.12, 0.58, 0.12), Vector3(-0.16, 0.42, 0.0), metal)
+	_add_fallback_capsule("RightLeg", Vector3(0.12, 0.58, 0.12), Vector3(0.16, 0.42, 0.0), metal)
+	_add_fallback_capsule("Blade", Vector3(0.035, 0.52, 0.035), Vector3(0.62, 1.25, -0.10), metal)
+
+
+func _add_fallback_capsule(part_name: String, dimensions: Vector3, at: Vector3, material: Material) -> void:
+	var mesh_node := MeshInstance3D.new()
+	mesh_node.name = part_name
+	var capsule := CapsuleMesh.new()
+	capsule.radius = dimensions.x
+	capsule.height = dimensions.y * 2.0
+	capsule.material = material
+	mesh_node.mesh = capsule
+	mesh_node.position = at
+	mesh_node.scale.z = dimensions.z / maxf(dimensions.x, 0.001)
+	fallback_node.add_child(mesh_node)
 
 
 # Prioritas karakter: Arissa (Mixamo, HP user) > sintetis Jules (glTF).
@@ -54,6 +97,7 @@ func _load_and_setup_character() -> void:
 				char_path_used = p
 				break
 	if char_scene == null:
+		_build_fallback_humanoid()
 		return
 	var inst := char_scene.instantiate()
 	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
@@ -64,9 +108,11 @@ func _load_and_setup_character() -> void:
 		_attach_hair()  # v7: rambut Sketchfab (CC-BY Marc Sawyer)
 	anim_player = _find_animation_player(inst)
 	if anim_player == null:
+		_build_fallback_humanoid()
 		return
 	var lib := anim_player.get_animation_library("")
 	if lib == null:
+		_build_fallback_humanoid()
 		return
 
 	# normalisasi animasi bawaan jadi "Idle"
@@ -271,6 +317,10 @@ func _physics_process(dt: float) -> void:
 		var h_c: float = ter.get_height_at(g.x, g.z)
 		var h_f: float = ter.get_height_at(g.x + fwd.x * 0.6, g.z + fwd.z * 0.6)
 		var h_r: float = ter.get_height_at(g.x + right.x * 0.6, g.z + right.z * 0.6)
-		position.y = lerp(position.y, h_c, 12.0 * dt)
+		# Player sudah ditempatkan physics di permukaan; proxy hanya perlu
+		# offset lokal relatif terhadap body, bukan tinggi dunia mentah.
+		var local_ground_offset: float = h_c - p.global_position.y
+		position.y = lerp(position.y, local_ground_offset, 12.0 * dt)
+
 		rotation.x = lerp(rotation.x, clampf((h_c - h_f) * 0.15, -0.12, 0.12), 8.0 * dt)
 		rotation.z = lerp(rotation.z, clampf((h_r - h_c) * 0.15, -0.12, 0.12), 8.0 * dt)

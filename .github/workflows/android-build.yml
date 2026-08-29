@@ -68,7 +68,7 @@ jobs:
       - name: PARSE-CHECK semua GDScript (gerbang permanen)
         run: |
           set -e
-          for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner; do
+          for s in main player_controller camera_follow hud floating_joystick ui_button arena_spawner terrain_generator grass proxy_humanoid runtime_smoke; do
             echo "-- check $s"
             "$GODOT_BIN" --headless --path . --check-only --script "res://scripts/$s.gd"
           done
@@ -81,6 +81,20 @@ jobs:
             echo "BOOT MERAH:"; grep -B2 -A2 "SCRIPT ERROR" boot.log; exit 1
           fi
           echo "BOOT HIJAU: 30 frame tanpa SCRIPT ERROR"
+
+      - name: RUNTIME-SMOKE scene production
+        run: |
+          set -e
+          cp project.godot "$RUNNER_TEMP/project.godot.original"
+          restore_project() { cp "$RUNNER_TEMP/project.godot.original" project.godot; }
+          trap restore_project EXIT
+          printf '\n[autoload]\nRuntimeSmoke="*res://scripts/runtime_smoke.gd"\n' >> project.godot
+          ZDEV_RUNTIME_SMOKE=1 "$GODOT_BIN" --headless --path . > smoke.log 2>&1
+          if grep -qE "smoke FAIL|RUNTIME SMOKE: MERAH|SCRIPT ERROR|Parse Error" smoke.log; then
+            echo "RUNTIME SMOKE MERAH:"; grep -E "smoke FAIL|RUNTIME SMOKE: MERAH|SCRIPT ERROR|Parse Error" smoke.log; exit 1
+          fi
+          grep -q "RUNTIME SMOKE: HIJAU" smoke.log
+          echo "RUNTIME SMOKE HIJAU"
 
       - name: Export APK (debug, arm32)
         run: |
