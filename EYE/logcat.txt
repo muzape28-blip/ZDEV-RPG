@@ -1,0 +1,7 @@
+08-29 08:33:12.451  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
+08-29 08:33:12.962  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
+08-29 08:33:13.473  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
+08-29 08:33:13.984  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
+08-29 08:33:14.495  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
+08-29 08:33:15.006  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
+08-29 08:33:15.518  2627  2645 I godot   : TEL stick=(0.00,0.00) vel=(0.00,0.00) face=0.00 camY=0.00 camP=0.00 extra=0.00
