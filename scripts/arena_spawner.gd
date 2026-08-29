@@ -151,7 +151,7 @@ func _spawn_trees(rng: RandomNumberGenerator) -> void:
 		var z := sin(a) * r
 		inst.position = Vector3(x, _h(x, z), z)
 		inst.rotation.y = rng.randf_range(0.0, TAU)
-		var s := rng.randf_range(0.8, 1.4)
+		var s := rng.randf_range(1.1, 1.8)  # v5: tinggikan sedikit = landmark kebaca di padang datar
 		inst.scale = Vector3(s, s, s)
 		add_child(inst)
 

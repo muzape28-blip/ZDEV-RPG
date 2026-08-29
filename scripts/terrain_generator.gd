@@ -30,18 +30,27 @@ func get_height_at(x: float, z: float) -> float:
 	return amplitude * noise.get_noise_2d(x, z) * t
 
 
-func _ground_color(h: float) -> Color:
-	# PADANG PASIR dasar: tan hangat, kontras sama karakter & landmark
-	var base := Color(0.62, 0.53, 0.38)
-	var low := Color(0.5, 0.42, 0.3)
-	var high := Color(0.7, 0.62, 0.45)
-	var t := clampf((h + amplitude) / (2.0 * amplitude), 0.0, 1.0)
+func _ground_color(h: float, x: float, z: float) -> Color:
+	# PALET PASIR v5 (riset albedo: desert sand ~0.4 linear, polycount PBR list).
+	# Nilai LINEAR (konversi dari sRGB): jangan tebak hex langsung.
+	var low := Color(0.40, 0.26, 0.12)   # trough antar-dune  (#A98B62 sRGB)
+	var high := Color(0.66, 0.50, 0.28)  # crest kena matahari (#D4BC90 sRGB)
+	# GUARD NaN (pelajaran UAT padang hitam): amplitude=0 => 0/0 = NaN yang
+	# menyebar ke lerp warna => vertex hitam. Flat = t tinggi dinetralkan.
+	var t := 0.0
+	if amplitude > 0.001:
+		t = clampf((h + amplitude) / (2.0 * amplitude), 0.0, 1.0)
+	# padang datar: patch noise skala BESAR menggantikan tinggi sbg driver,
+	# setengah-setengah biar fase bukit nanti nyambung mulus.
+	var patch := noise.get_noise_2d(x * 0.02, z * 0.02) * 0.5 + 0.5
+	t = clampf(0.5 * t + 0.5 * patch, 0.0, 1.0)
 	var c := low.lerp(high, t)
-	# sedikit variasi regional biar nggak rata-membosankan
-	var v := noise.get_noise_2d(h * 13.7, t * 31.1) * 0.04
-	c.r = clampf(c.r + v, 0.0, 1.0)
-	c.g = clampf(c.g + v, 0.0, 1.0)
-	c.b = clampf(c.b + v * 0.7, 0.0, 1.0)
+	# mottle frekuensi sedang + speckle kering jarang (struktur 3 lapis)
+	var v := noise.get_noise_2d(x * 0.35, z * 0.35) * 0.03
+	var sp := noise.get_noise_2d(x * 1.7 + 40.0, z * 1.7) * 0.02
+	c.r = clampf(c.r + v + sp, 0.0, 1.0)
+	c.g = clampf(c.g + v + sp * 0.8, 0.0, 1.0)
+	c.b = clampf(c.b + v * 0.7 + sp * 0.5, 0.0, 1.0)
 	return c
 
 
@@ -73,7 +82,7 @@ func _build_terrain() -> void:
 			var hd: float = heights[maxi(iz - 1, 0)][ix]
 			var hu: float = heights[mini(iz + 1, n)][ix]
 			nrms.append(Vector3(hl - hr, 2.0 * step, hd - hu).normalized())
-			cols.append(_ground_color(h))
+			cols.append(_ground_color(h, x, z))
 
 	for iz in range(n):
 		for ix in range(n):

@@ -2,8 +2,8 @@ extends CharacterBody3D
 
 # M0: gerak + dodge. Attack masih stub (masuk M1).
 @export var walk_speed := 6.0
-@export var dash_speed := 15.0
-@export var dash_duration := 0.26
+@export var dash_speed := 17.0   # v5: jangkauan dodge 3.9 m -> ~5.1 m
+@export var dash_duration := 0.30
 @export var accel := 40.0
 @export var gravity_strength := 20.0
 
@@ -12,6 +12,9 @@ var dash_timer := 0.0
 var dash_dir := Vector3(0.0, 0.0, -1.0)
 var cam: Node = null
 var move_smooth := Vector3.ZERO
+var was_dash := false      # v5: deteksi transisi dodge->biasa utk fallback smooth
+var dodge_block_t := 0.0   # v5: blok recenter kamera pasca-dodge (dibaca kamera)
+var strafe_anim := ""      # v5: dibaca proxy utk anim Standing Walk L/R/Back
 
 
 func _ready() -> void:
@@ -54,7 +57,11 @@ func request_dodge() -> void:
 		var rgt := Vector3(-fwd.z, 0.0, fwd.x)
 		var lat := dir.dot(rgt)
 		var lon := dir.dot(fwd)
-		if abs(lat) > abs(lon):
+		# v5: sektor BELAKANG diperlebar — serong kiri/kanan-belakang tetap
+		# pakai anim DodgeBack, tapi VETTOR dash tetap serong ikut stick.
+		if lon < 0.0 and abs(lon) > 0.35 * abs(lat):
+			alias = "DodgeBack"
+		elif abs(lat) > abs(lon):
 			alias = "DodgeRight" if lat > 0.0 else "DodgeLeft"
 		elif lon > 0.0:
 			alias = "DodgeForward"
@@ -62,6 +69,7 @@ func request_dodge() -> void:
 			alias = "DodgeBack"
 	dash_dir = dir.normalized()
 	dash_timer = dash_duration
+	dodge_block_t = 2.0  # v5: kamera jangan recenter 2 dtk pasca-dodge
 	rot_hold = 0.3  # jangan putar badan selama & sesaat setelah dodge
 	var proxy := get_node_or_null("Proxy")
 	if proxy != null and proxy.has_method("play_one_shot"):
@@ -159,6 +167,7 @@ func _physics_process(delta: float) -> void:
 
 	parry_timer = maxf(0.0, parry_timer - delta)
 	rot_hold = maxf(0.0, rot_hold - delta)
+	dodge_block_t = maxf(0.0, dodge_block_t - delta)
 	atk_cd -= delta
 	if atk_cd <= 0.0 and atk_buffer > 0.0:
 		atk_buffer = 0.0
@@ -175,6 +184,10 @@ func _physics_process(delta: float) -> void:
 		velocity.x = lunge_dir.x * 7.0
 		velocity.z = lunge_dir.z * 7.0
 	else:
+		# v5: transisi dodge->biasa = fallback SMOOTH: arah blend mulai dari
+		# arah dodge, bukan nilai lama sebelum dodge (anti cross-blend aneh).
+		if was_dash:
+			move_smooth = dash_dir
 		var dir := _move_direction()
 		# PAKET ANTI-MOBIL: kurva pow 1.25 = rasa gas-pedal;
 		# smoothing arah = anti zig-zag overcorrection; turn-rate 26 =
@@ -186,13 +199,29 @@ func _physics_process(delta: float) -> void:
 		if mag < 0.05 and is_on_floor():
 			velocity.x = 0.0  # zero saat idle di lantai: anti-drift gravitasi
 			velocity.z = 0.0
+		# v5 STRAFE HYBRID: band jalan + stick dominan samping/belakang =>
+		# anim Standing Walk L/R/Back & badan lerp hadap KAMERA (rasa PGR);
+		# lari/depan = putar hadap arah (rasa Genshin).
+		strafe_anim = ""
+		if mag > 0.15 and spd < 2.6:
+			var lat := move_input.x
+			var lon := -move_input.y
+			if abs(lat) > 0.5 and abs(lat) >= abs(lon):
+				strafe_anim = "WalkRight" if lat > 0.0 else "WalkLeft"
+			elif lon < -0.5:
+				strafe_anim = "WalkBack"
 		move_smooth = move_smooth.lerp(dir, clampf(14.0 * delta, 0.0, 1.0))
 		var target := move_smooth * spd
 		velocity.x = move_toward(velocity.x, target.x, accel * delta)
 		velocity.z = move_toward(velocity.z, target.z, accel * delta)
 		if move_smooth.length_squared() > 0.001 and dash_timer <= 0.0 and rot_hold <= 0.0:
-			var target_yaw := atan2(move_smooth.x, move_smooth.z)
-			rotation.y = lerp_angle(rotation.y, target_yaw, 26.0 * delta)
+			if strafe_anim != "" and cam != null and cam.has_method("get_yaw"):
+				# hadap kamera pelan-pelan saat strafe
+				rotation.y = lerp_angle(rotation.y, cam.get_yaw(), 10.0 * delta)
+			else:
+				var target_yaw := atan2(move_smooth.x, move_smooth.z)
+				rotation.y = lerp_angle(rotation.y, target_yaw, 26.0 * delta)
+	was_dash = dash_timer > 0.0
 
 	move_and_slide()
 

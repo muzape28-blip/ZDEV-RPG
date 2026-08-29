@@ -35,6 +35,10 @@ const ANIM_SOURCES: Array = [
 	["res://ASSETS/ARRISA/Standing Dodge Right.fbx", "DodgeRight", false],
 	["res://ASSETS/ARRISA/Standing Dodge Backward.fbx", "DodgeBack", false],
 	["res://ASSETS/ARRISA/Standing Dodge Forward.fbx", "DodgeForward", false],
+	# v5 STRAFE HYBRID: jalan menyamping/mundur (nama file persis, "right" kecil)
+	["res://ASSETS/ARRISA/Standing Walk Left.fbx", "WalkLeft", true],
+	["res://ASSETS/ARRISA/Standing Walk right.fbx", "WalkRight", true],
+	["res://ASSETS/ARRISA/Standing Walk Back.fbx", "WalkBack", true],
 ]
 
 
@@ -51,6 +55,7 @@ func _load_and_setup_character() -> void:
 	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
 	add_child(inst)
 	model_node = inst
+	_hide_cloak(inst)  # v5: jubah "tempurung" OFF (Cloak_Geo node terpisah)
 	anim_player = _find_animation_player(inst)
 	if anim_player == null:
 		return
@@ -98,8 +103,39 @@ func _load_and_setup_character() -> void:
 		if lib.has_animation(nm):
 			lib.get_animation(nm).loop_mode = Animation.LOOP_LINEAR
 
+	# v5: strip translasi horizontal Hips di SEMUA anim jahitan = fix bug
+	# "char geser balik seakan recenter" pasca-dodge (klip dodge Mixamo bawa
+	# root-motion samping; badan udah meluncur lewat kode => gerak dobel,
+	# lalu tulang balik nol => snap). Kalau klip emang in-place, strip no-op.
+	for nm2 in anim_player.get_animation_list():
+		_strip_hips_xz(anim_player.get_animation(nm2))
+
 	if anim_player.has_animation("Idle"):
 		anim_player.play("Idle")
+
+
+# v5: sembunyikan mesh jubah (node terpisah "Cloak_Geo" di FBX Arissa).
+# visible=false (bukan free) biar skin/bone refs aman.
+func _hide_cloak(root: Node) -> void:
+	for n in root.get_children():
+		_hide_cloak(n)
+	if root.name.findn("cloak") != -1 and root is MeshInstance3D:
+		(root as MeshInstance3D).visible = false
+
+
+# v5: nolkan translasi X/Z track Hips (biar Y: bob/ngangkang tetap hidup).
+func _strip_hips_xz(an: Animation) -> void:
+	if an == null:
+		return
+	for ti in range(an.get_track_count()):
+		if an.track_get_type(ti) != Animation.TRACK_POSITION:
+			continue
+		if str(an.track_get_path(ti)).find("Hips") == -1:
+			continue
+		for ki in range(an.track_get_key_count(ti)):
+			var kv = an.track_get_key_value(ti, ki)
+			if kv is Vector3:
+				an.track_set_key_value(ti, ki, Vector3(0.0, kv.y, 0.0))
 
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
@@ -130,6 +166,13 @@ func _physics_process(dt: float) -> void:
 		target_anim = "Walking"
 	if anim_player != null and target_anim == "Sprint" and not anim_player.has_animation("Sprint"):
 		target_anim = "Running"  # fallback: sprint = run + speed_scale tinggi
+
+	# v5 STRAFE HYBRID: band jalan + arah samping/belakang (dihitung di
+	# player_controller) => Standing Walk Left/right/Back.
+	var sa = p.get("strafe_anim")
+	if target_anim == "Walking" and sa != null and String(sa) != "":
+		if anim_player != null and anim_player.has_animation(String(sa)):
+			target_anim = String(sa)
 
 	# one-shot (dodge)优先: jangan ditimpa switching sampai selesai
 	var skip_switch := false
