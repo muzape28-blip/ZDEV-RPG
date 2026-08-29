@@ -294,3 +294,10 @@ CI resmi & DEVICE = menunggu.
 Temuan samping (jangan lupa): engine lokal custom TIDAK punya importer FBX
 => verifikasi lokal karakter selalu fallback ke Jules glTF; Arissa hanya
 teruji di CI resmi + device. Boot lokal = boot logika, bukan boot Arissa.
+
+### Addendum #16 — pelajaran CI #5 (2bf6342 merah -> fix)
+- Duplicate `func _process` di main.gd (DIAG live nambah _process kedua;
+  TEL udah punya) => parse resmi merah. LOKAL LEWAT (analizer build custom
+  beda ketat) => pelajaran berulang: CI resmi = hakim, lokal = saringan awal.
+- Sisa `pv.dist` di print TEL (dist dihapus kamera v3) => bakal runtime
+  error; ikut difix jadi `pv.extra`.

@@ -56,9 +56,23 @@ func _process(delta: float) -> void:
 		var pv := get_node_or_null("Player/CameraPivot")
 		if p != null and pv != null:
 			var v: Vector3 = p.velocity
-			print("TEL stick=(%.2f,%.2f) vel=(%.2f,%.2f) face=%.2f camY=%.2f camP=%.2f dist=%.2f" % [
+			print("TEL stick=(%.2f,%.2f) vel=(%.2f,%.2f) face=%.2f camY=%.2f camP=%.2f extra=%.2f" % [
 				p.move_input.x, p.move_input.y, v.x, v.z,
-				p.rotation.y, pv.rotation.y, pv.rotation.x, pv.dist])
+				p.rotation.y, pv.rotation.y, pv.rotation.x, pv.extra])
+
+	# DIAG LIVE on-screen (mata device, pengganti logcat)
+	if diag_lbl != null:
+		diag_acc += delta
+		if diag_acc >= 0.25:
+			diag_acc = 0.0
+			var y := 0.0
+			var fl := 0
+			if diag_player != null:
+				y = diag_player.global_position.y
+				if diag_player.has_method("is_on_floor") and diag_player.is_on_floor():
+					fl = 1
+			diag_lbl.text = "t=%05.1f y=%.2f fl=%d fps=%d" % [
+				Time.get_ticks_msec() / 1000.0, y, fl, Engine.get_frames_per_second()]
 
 
 var diag_lbl: Label = null
@@ -83,19 +97,4 @@ func _diag_hud() -> void:
 	diag_lbl = lbl
 
 
-func _process(delta: float) -> void:
-	if diag_lbl == null:
-		return
-	diag_acc += delta
-	if diag_acc < 0.25:
-		return
-	diag_acc = 0.0
-	var y := 0.0
-	var fl := 0
-	if diag_player != null:
-		y = diag_player.global_position.y
-		if diag_player.has_method("is_on_floor") and diag_player.is_on_floor():
-			fl = 1
-	diag_lbl.text = "t=%05.1f y=%.2f fl=%d fps=%d" % [
-		Time.get_ticks_msec() / 1000.0, y, fl, Engine.get_frames_per_second()]
 # trigger eye
