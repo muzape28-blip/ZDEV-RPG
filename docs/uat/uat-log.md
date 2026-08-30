@@ -323,3 +323,15 @@ teruji di CI resmi + device. Boot lokal = boot logika, bukan boot Arissa.
    (cap 3.2); badan hadap kamera 10/s.
 7. Anti-mobil v2: run-depan blend 30/s + yaw arah mentah 45/s.
 8. Anti-stuck-ngangkang: watchdog one_shot 2.5 dtk + clear saat anim habis.
+
+## Entri #18 — 2026-08-30 · Integrasi aset ronde 2 (user push png + fbx)
+- Texture.rar diekstrak USER di Termux (sandbox tak punya unrar) => 7 png
+  masuk ASSETS/ARRISA. cavi1.png = tekstur helai rambut ("cavi"=capelli),
+  BUKAN tekstur desert.
+- Standing Dodge Forward.fbx dipindah dari main-orphan ke arena; slot
+  DodgeForward hidup (anti-skateboard-depan lengkap).
+- Hair mount: albedo = Hair_Diffuse_Map.png (fallback warna). Alpha/scissor
+  = iterasi berikutnya bila device menunjukkan "helm".
+- desert.fbx + Hair.fbx/mtl = arsip tidur di ARRISA; tekstur desert
+  (as_normal.png dll) BELUM ADA => desert.fbx jangan diaktifkan dulu.
+- Texture.rar TIDAK di-commit ke arena (redundan dgn png).

@@ -79,7 +79,7 @@ const ANIM_SOURCES: Array = [
 	["res://ASSETS/ARRISA/Standing Dodge Left.fbx", "DodgeLeft", false],
 	["res://ASSETS/ARRISA/Standing Dodge Right.fbx", "DodgeRight", false],
 	["res://ASSETS/ARRISA/Standing Dodge Backward.fbx", "DodgeBack", false],
-	["res://ASSETS/ARRISA/Standing Dodge Forward.fbx", "DodgeForward", false],
+	["res://ASSETS/ARRISA/Standing Dodge Forward.fbx", "DodgeForward", false],  # v9: file naik, slot hidup
 	# v5 STRAFE HYBRID: jalan menyamping/mundur (nama file persis, "right" kecil)
 	["res://ASSETS/ARRISA/Standing Walk Left.fbx", "WalkLeft", true],
 	["res://ASSETS/ARRISA/Standing Walk right.fbx", "WalkRight", true],
@@ -195,12 +195,20 @@ func _attach_hair() -> void:
 	if mi == null or mi.mesh == null:
 		hi.free()
 		return
-	# material deterministik: Hair = coklat gelap, Dummy (scalp) = kulit
+	# material: Hair = tekstur diffuse asli (CC-BY Marc Sawyer) bila ada,
+	# fallback coklat gelap; Dummy (scalp) = warna kulit.
+	var hair_tex: Texture2D = null
+	var ht := load("res://ASSETS/ARRISA/Hair_Diffuse_Map.png")
+	if ht != null:
+		hair_tex = ht as Texture2D
 	for i in range(mi.mesh.get_surface_count()):
 		var sm := StandardMaterial3D.new()
 		sm.roughness = 0.9
 		if String(mi.mesh.surface_get_name(i)).findn("dummy") != -1:
 			sm.albedo_color = Color(0.55, 0.40, 0.30)
+		elif hair_tex != null:
+			sm.albedo_texture = hair_tex
+			sm.uv1_scale = Vector3(1.0, 1.0, 1.0)
 		else:
 			sm.albedo_color = Color(0.09, 0.06, 0.04)
 		mi.set_surface_override_material(i, sm)
