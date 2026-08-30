@@ -16,6 +16,8 @@ var was_dash := false      # v5: deteksi transisi dodge->biasa utk fallback smoo
 var dodge_block_t := 0.0   # v5: blok recenter kamera pasca-dodge (dibaca kamera)
 var strafe_anim := ""      # v5: dibaca proxy utk anim Standing Walk L/R/Back
 var grace_t := 0.8         # v7: buang input 0.8 dtk pertama (anti ghost-stick startup)
+var dodge_face_lock_t := 0.0  # v9: kunci hadap kamera selama dodge samping/belakang
+var last_dodge_lateral := false
 
 
 func _ready() -> void:
@@ -79,6 +81,10 @@ func request_dodge() -> void:
 	dash_timer = dash_duration
 	dodge_block_t = 2.0  # v5: kamera jangan recenter 2 dtk pasca-dodge
 	rot_hold = 0.3  # jangan putar badan selama & sesaat setelah dodge
+	# v9: dodge samping/belakang = badan kembali hadap KAMERA (anim dodge
+	# melangkah sideways hadap-depan), bukan muter ke arah luncuran.
+	last_dodge_lateral = alias != "DodgeForward"
+	dodge_face_lock_t = dash_duration + 0.25
 	var proxy := get_node_or_null("Proxy")
 	if proxy != null and proxy.has_method("play_one_shot"):
 		proxy.play_one_shot(alias)
@@ -180,6 +186,7 @@ func _physics_process(delta: float) -> void:
 	rot_hold = maxf(0.0, rot_hold - delta)
 	dodge_block_t = maxf(0.0, dodge_block_t - delta)
 	grace_t = maxf(0.0, grace_t - delta)
+	dodge_face_lock_t = maxf(0.0, dodge_face_lock_t - delta)
 	atk_cd -= delta
 	if atk_cd <= 0.0 and atk_buffer > 0.0:
 		atk_buffer = 0.0
@@ -222,7 +229,7 @@ func _physics_process(delta: float) -> void:
 			elif lon < -0.35:
 				strafe_anim = "WalkBack"
 		if strafe_anim != "":
-			spd = minf(spd, 3.2)
+			spd = minf(spd, 2.6)  # v9: puncak "brisk walk", bukan lari-lari kecil
 		# v7 ANTI-MOBIL-v2: run-depan = blend kecepatan 30/s + yaw ikut arah
 		# MENTAH 45/s => drag kamera = dunia muter, char nempel (bukan nyetir).
 		# Strafe/pelan = lembut seperti sebelumnya (14/s & 26/s).
@@ -233,7 +240,9 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, target.x, accel * delta)
 		velocity.z = move_toward(velocity.z, target.z, accel * delta)
 		if move_smooth.length_squared() > 0.001 and dash_timer <= 0.0 and rot_hold <= 0.0:
-			if strafe_anim != "" and cam != null and cam.has_method("get_yaw"):
+			if dodge_face_lock_t > 0.0 and last_dodge_lateral and cam != null and cam.has_method("get_yaw"):
+				rotation.y = lerp_angle(rotation.y, cam.get_yaw(), 12.0 * delta)
+			elif strafe_anim != "" and cam != null and cam.has_method("get_yaw"):
 				# hadap kamera pelan-pelan saat strafe
 				rotation.y = lerp_angle(rotation.y, cam.get_yaw(), 10.0 * delta)
 			else:

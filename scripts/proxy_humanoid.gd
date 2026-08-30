@@ -16,10 +16,13 @@ var fallback_dodge_sign := 1.0
 
 # dipanggil player_controller saat dodge berarah
 func play_one_shot(anim: String) -> void:
+	# v9: FREEZE locomotion dipisah dari ketersediaan anim — walau klip
+	# absen, switching tetap beku selama dodge (anti-"skateboard").
+	one_shot_active = true
+	one_shot_t = 0.0
 	if anim_player != null and anim != "" and anim_player.has_animation(anim):
 		anim_player.play(anim, 0.08)
-		one_shot_active = true
-		one_shot_t = 0.0
+		current_anim = anim  # v9: rantai state eksplisit => blend keluar mulus
 	if fallback_node != null:
 		fallback_dodge_t = 0.22
 		fallback_dodge_sign = -1.0 if anim.contains("Left") else 1.0

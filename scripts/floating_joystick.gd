@@ -4,9 +4,13 @@ extends Control
 # Hint ring tipis (~12% alpha) tetap ada demi discoverability (AGENTS.md §12).
 signal moved(vector: Vector2)
 
-const RADIUS := 78.0
-const HINT_X := 150.0
-const HINT_BOTTOM_MARGIN := 190.0
+# v9: travel DIPERLUAS (78→105) biar gradasi walk↔run punya ruang;
+# dead-zone 0.08 anti-jitter; skin AAA prosedural (cincin tipis translucent,
+# knob gradient, arc arah aktif) — nol tekstur, nol lisensi, ringan di GPU.
+const RADIUS := 105.0
+const DEAD := 0.08
+const HINT_X := 160.0
+const HINT_BOTTOM_MARGIN := 200.0
 
 var active_id := -1
 var origin := Vector2.ZERO
@@ -36,7 +40,9 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag and event.index == active_id:
 		vec = (event.position - origin) / RADIUS
 		vec = vec.limit_length(1.0)
-		moved.emit(vec)
+		# v9 dead-zone radial: noise jempol nggak kebaca gerak
+		var out := vec if vec.length() > DEAD else Vector2.ZERO
+		moved.emit(out)
 		queue_redraw()
 
 
@@ -62,8 +68,18 @@ func release_all() -> void:
 func _draw() -> void:
 	if not pressed:
 		origin = _hint_origin()
-	var base_alpha := 0.30 if pressed else 0.12
-	var knob_alpha := 0.85 if pressed else 0.25
-	draw_circle(origin, RADIUS, Color(1.0, 1.0, 1.0, base_alpha * 0.35))
-	draw_arc(origin, RADIUS, 0.0, TAU, 24, Color(1.0, 1.0, 1.0, base_alpha), 3.0)
-	draw_circle(origin + vec * RADIUS, 26.0, Color(1.0, 1.0, 1.0, knob_alpha))
+	# v9 skin AAA: cincin tipis translucent + isi sangat pudar + knob dua lapis
+	var ring_a := 0.32 if pressed else 0.14
+	var fill_a := 0.10 if pressed else 0.04
+	var knob_a := 0.75 if pressed else 0.22
+	draw_circle(origin, RADIUS, Color(1.0, 1.0, 1.0, fill_a))
+	draw_arc(origin, RADIUS, 0.0, TAU, 40, Color(1.0, 1.0, 1.0, ring_a), 2.0)
+	# arc highlight arah aktif (feedback gradasi walk↔run kebaca mata)
+	if pressed and vec.length() > DEAD:
+		var ang := atan2(vec.y, vec.x)
+		draw_arc(origin, RADIUS - 5.0, ang - 0.45, ang + 0.45, 12,
+			Color(1.0, 1.0, 1.0, clampf(vec.length(), 0.0, 1.0) * 0.55), 4.0)
+	# knob: halo lembut + inti
+	var kp := origin + vec * RADIUS
+	draw_circle(kp, 34.0, Color(1.0, 1.0, 1.0, knob_a * 0.35))
+	draw_circle(kp, 26.0, Color(1.0, 1.0, 1.0, knob_a))
