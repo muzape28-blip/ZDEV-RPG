@@ -4,6 +4,9 @@ extends Node3D
 # Memuat aset GLTF character (Idle, Walking, Running, Sprint)
 # Menghubungkan kecepatan joystick ke AnimationTree (BlendSpace1D) / AnimationPlayer
 
+const CLOAK_ON := true   # v10 saklar: jubah + kibar
+const HAIR_ON := true    # v10 saklar: rambut bertekstur
+
 var anim_player: AnimationPlayer
 var model_node: Node3D
 var current_anim := "Idle"
@@ -106,8 +109,11 @@ func _load_and_setup_character() -> void:
 	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
 	add_child(inst)
 	model_node = inst
-	_hide_cloak(inst)  # v5: jubah "tempurung" OFF (Cloak_Geo node terpisah)
-	if char_path_used.findn("arissa") != -1:
+	# v10: saklar kepala — hood jubah vs rambut. Default dua-duanya ON
+	# (ponytail keluar dari bawah hood); bila UAT nampak clipping, matikan satu.
+	if CLOAK_ON:
+		_setup_cloak(inst)
+	if HAIR_ON and char_path_used.findn("arissa") != -1:
 		_attach_hair()  # v7: rambut Sketchfab (CC-BY Marc Sawyer)
 	anim_player = _find_animation_player(inst)
 	if anim_player == null:
@@ -230,13 +236,67 @@ func _find_mesh(node: Node) -> MeshInstance3D:
 	return null
 
 
-# v5: sembunyikan mesh jubah (node terpisah "Cloak_Geo" di FBX Arissa).
-# visible=false (bukan free) biar skin/bone refs aman.
-func _hide_cloak(root: Node) -> void:
-	for n in root.get_children():
-		_hide_cloak(n)
-	if root.name.findn("cloak") != -1 and root is MeshInstance3D:
-		(root as MeshInstance3D).visible = false
+# v10 JUBAH KIBAR — spring-bone lite teredam di rantai mixamorig:Cloak1..7
+# (riset_fisika_jubah_cape_mobile.md §2.2: pendekatan B = standar mobile;
+#  Verlet penuh = upgrade path). Root 100% ikut anim; anak di-simulasi:
+#  angin = -velocity (ruang model) + sway idle; pitch/roll di-clamp;
+#  gain membesar ke ujung (ujung paling liar). Dodge arah mana pun =>
+#  whip-lag simetris (Verlet peduli perubahan posisi, bukan arah).
+var skel_cloak: Skeleton3D = null
+var cloak_ids: Array = []
+var cloak_rest: Array = []
+var cloak_pitch: Array = []
+var cloak_roll: Array = []
+var cloak_t := 0.0
+
+const CAPE_PITCH_K := 0.05
+const CAPE_ROLL_K := 0.035
+const CAPE_MAX_P := 0.4
+const CAPE_MAX_R := 0.3
+
+
+func _setup_cloak(root: Node) -> void:
+	skel_cloak = _find_skeleton(root)
+	if skel_cloak == null:
+		return
+	for i in range(1, 9):
+		var idx := skel_cloak.find_bone("mixamorig:Cloak%d" % i)
+		if idx == -1:
+			continue
+		cloak_ids.append(idx)
+		cloak_rest.append(skel_cloak.get_bone_pose_rotation(idx))
+		cloak_pitch.append(0.0)
+		cloak_roll.append(0.0)
+
+
+func _find_skeleton(node: Node) -> Skeleton3D:
+	if node is Skeleton3D:
+		return node as Skeleton3D
+	for child in node.get_children():
+		var f := _find_skeleton(child)
+		if f != null:
+			return f
+	return null
+
+
+func _tick_cloak(dt: float) -> void:
+	if skel_cloak == null or cloak_ids.is_empty() or model_node == null:
+		return
+	var p := get_parent()
+	if p == null:
+		return
+	cloak_t += dt
+	var vel: Vector3 = p.velocity
+	# angin relatif: kebalikan velocity char, di ruang model
+	var wind: Vector3 = model_node.global_transform.basis.inverse() * Vector3(vel.x, 0.0, vel.z) * -1.0
+	for n in range(cloak_ids.size()):
+		var gain := 1.0 + float(n) * 0.4
+		var tp := clampf(wind.z * CAPE_PITCH_K * gain + sin(cloak_t * 2.1 + float(n) * 0.7) * 0.03, -CAPE_MAX_P, CAPE_MAX_P)
+		var tr := clampf(wind.x * CAPE_ROLL_K * gain + cos(cloak_t * 1.7 + float(n)) * 0.02, -CAPE_MAX_R, CAPE_MAX_R)
+		cloak_pitch[n] = lerpf(cloak_pitch[n], tp, clampf(10.0 * dt, 0.0, 1.0))
+		cloak_roll[n] = lerpf(cloak_roll[n], tr, clampf(10.0 * dt, 0.0, 1.0))
+		var q: Quaternion = cloak_rest[n] * Quaternion(Vector3(1.0, 0.0, 0.0), cloak_pitch[n]) * Quaternion(Vector3(0.0, 0.0, 1.0), cloak_roll[n])
+		skel_cloak.set_bone_pose_rotation(cloak_ids[n], q)
 
 
 # v5: nolkan translasi X/Z track Hips (biar Y: bob/ngangkang tetap hidup).
@@ -335,3 +395,5 @@ func _physics_process(dt: float) -> void:
 
 		rotation.x = lerp(rotation.x, clampf((h_c - h_f) * 0.15, -0.12, 0.12), 8.0 * dt)
 		rotation.z = lerp(rotation.z, clampf((h_r - h_c) * 0.15, -0.12, 0.12), 8.0 * dt)
+
+	_tick_cloak(dt)  # v10: jubah kibar tiap frame fisika
