@@ -15,6 +15,7 @@ var move_smooth := Vector3.ZERO
 var was_dash := false      # v5: deteksi transisi dodge->biasa utk fallback smooth
 var dodge_block_t := 0.0   # v5: blok recenter kamera pasca-dodge (dibaca kamera)
 var strafe_anim := ""      # v5: dibaca proxy utk anim Standing Walk L/R/Back
+var grace_t := 0.8         # v7: buang input 0.8 dtk pertama (anti ghost-stick startup)
 
 
 func _ready() -> void:
@@ -39,12 +40,19 @@ func request_dodge() -> void:
 	var alias := ""
 	if dir.length_squared() < 0.01:
 		# tanpa input: backstep dengan animasi DodgeBack
-		var cam := get_node_or_null("CameraPivot/Camera3D")
-		if cam != null:
-			dir = -cam.global_transform.basis.z
+		var cam_node: Camera3D = get_node_or_null("CameraPivot/CameraArm/Camera3D") as Camera3D
+		if cam_node == null:
+			cam_node = get_node_or_null("CameraPivot/Camera3D") as Camera3D
+		if cam_node != null:
+			dir = cam_node.global_position - global_position
+			dir.y = 0.0
+		if dir.length_squared() > 0.01:
+			dir = dir.normalized()
 		else:
-			dir = -global_transform.basis.z
+			# Fallback: Node3D forward proyek ini adalah -basis.z.
+			dir = global_transform.basis.z
 		dir.y = 0.0
+
 		alias = "DodgeBack"
 	else:
 		# arah stick relatif KAMERA (bukan hadap karakter — karakter selalu
@@ -147,7 +155,7 @@ func _start_attack() -> void:
 
 
 func _move_direction() -> Vector3:
-	if move_input.length_squared() < 0.001:
+	if grace_t > 0.0 or move_input.length_squared() < 0.001:
 		return Vector3.ZERO
 	# Gerakan RELATIF kamera: joystick atas selalu menjauhi kamera,
 	# berapa pun yaw orbitnya.
@@ -164,10 +172,14 @@ func _move_direction() -> Vector3:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity_strength * delta
+		# v7 ANTI-TUNNELING: cap jatuh -12 m/s => langkah fisika worst-case
+		# (delta jank 0.1 s) = 1.2 m « tebal box 40 m. Respawn -30 = sabuk terakhir.
+		velocity.y = maxf(velocity.y, -12.0)
 
 	parry_timer = maxf(0.0, parry_timer - delta)
 	rot_hold = maxf(0.0, rot_hold - delta)
 	dodge_block_t = maxf(0.0, dodge_block_t - delta)
+	grace_t = maxf(0.0, grace_t - delta)
 	atk_cd -= delta
 	if atk_cd <= 0.0 and atk_buffer > 0.0:
 		atk_buffer = 0.0
@@ -190,27 +202,33 @@ func _physics_process(delta: float) -> void:
 			move_smooth = dash_dir
 		var dir := _move_direction()
 		# PAKET ANTI-MOBIL: kurva pow 1.25 = rasa gas-pedal;
-		# smoothing arah = anti zig-zag overcorrection; turn-rate 26 =
-		# "menghadap" bukan "menyetir".
-		var mag := move_input.length()
+		# smoothing arah = anti zig-zag overcorrection.
+		var mag := 0.0 if grace_t > 0.0 else move_input.length()
 		var spd := pow(mag, 1.25) * 6.0
 		if mag > 0.15 and spd < 2.0:
 			spd = 2.0
 		if mag < 0.05 and is_on_floor():
 			velocity.x = 0.0  # zero saat idle di lantai: anti-drift gravitasi
 			velocity.z = 0.0
-		# v5 STRAFE HYBRID: band jalan + stick dominan samping/belakang =>
-		# anim Standing Walk L/R/Back & badan lerp hadap KAMERA (rasa PGR);
-		# lari/depan = putar hadap arah (rasa Genshin).
+		# v7 STRAFE SPEK USER: RUN cuma buat stick DEPAN. Samping/belakang
+		# (berapa pun besarnya) = SELALU Standing Walk L/R/Back, speed cap
+		# 3.2 biar kaki nggak seluncur lawan klip; badan hadap kamera.
 		strafe_anim = ""
-		if mag > 0.15 and spd < 2.6:
-			var lat := move_input.x
-			var lon := -move_input.y
-			if abs(lat) > 0.5 and abs(lat) >= abs(lon):
+		if mag > 0.15:
+			var lat := 0.0 if grace_t > 0.0 else move_input.x
+			var lon := 0.0 if grace_t > 0.0 else -move_input.y
+			if abs(lat) >= abs(lon) and abs(lat) > 0.35:
 				strafe_anim = "WalkRight" if lat > 0.0 else "WalkLeft"
-			elif lon < -0.5:
+			elif lon < -0.35:
 				strafe_anim = "WalkBack"
-		move_smooth = move_smooth.lerp(dir, clampf(14.0 * delta, 0.0, 1.0))
+		if strafe_anim != "":
+			spd = minf(spd, 3.2)
+		# v7 ANTI-MOBIL-v2: run-depan = blend kecepatan 30/s + yaw ikut arah
+		# MENTAH 45/s => drag kamera = dunia muter, char nempel (bukan nyetir).
+		# Strafe/pelan = lembut seperti sebelumnya (14/s & 26/s).
+		var fwd_run := strafe_anim == "" and spd > 2.6
+		var blend := 30.0 if fwd_run else 14.0
+		move_smooth = move_smooth.lerp(dir, clampf(blend * delta, 0.0, 1.0))
 		var target := move_smooth * spd
 		velocity.x = move_toward(velocity.x, target.x, accel * delta)
 		velocity.z = move_toward(velocity.z, target.z, accel * delta)
@@ -219,11 +237,23 @@ func _physics_process(delta: float) -> void:
 				# hadap kamera pelan-pelan saat strafe
 				rotation.y = lerp_angle(rotation.y, cam.get_yaw(), 10.0 * delta)
 			else:
-				var target_yaw := atan2(move_smooth.x, move_smooth.z)
-				rotation.y = lerp_angle(rotation.y, target_yaw, 26.0 * delta)
+				var rate := 45.0 if fwd_run else 26.0
+				var ysrc := dir if fwd_run else move_smooth
+				var target_yaw := atan2(ysrc.x, ysrc.z)
+				rotation.y = lerp_angle(rotation.y, target_yaw, rate * delta)
 	was_dash = dash_timer > 0.0
 
 	move_and_slide()
+
+	# v7 SAFETY-NET ANTI-TUNNELING: dunia fase padang = lantai datar y=0.
+	# Frame jank device (delta raksasa) bisa menyetor badan ke dalam solid
+	# sebelum kolisi sempat merespons; angkat balik dalam 1 frame = tak
+	# terlihat oleh mata, membunuh kelas bug "char di bawah floor" selamanya.
+	# (Bila fase open-world kelak punya lubang/jurang, cabut guard ini.)
+	if global_position.y < 0.0:
+		global_position.y = 0.02
+		if velocity.y < 0.0:
+			velocity.y = 0.0
 
 	var hud := get_node_or_null("/root/Main/HUD/HudRoot")
 	if hud != null and hud.has_method("set_player_hp"):

@@ -34,6 +34,10 @@ func _ready() -> void:
 	col.position = Vector3(0.0, 1.3, 0.0)
 	add_child(col)
 	position = Vector3(0.0, 0.0, 8.0)
+	# Dummy menerima hit berbasis range/arc, bukan physical body pushing player.
+	# Layer/mask nol menjaga movement deterministik saat player mendekat.
+	collision_layer = 0
+	collision_mask = 0
 
 
 func _physics_process(dt: float) -> void:

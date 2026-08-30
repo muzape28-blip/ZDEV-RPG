@@ -60,19 +60,38 @@ func _process(delta: float) -> void:
 				p.move_input.x, p.move_input.y, v.x, v.z,
 				p.rotation.y, pv.rotation.y, pv.rotation.x, pv.extra])
 
-	# DIAG LIVE on-screen (mata device, pengganti logcat)
+	# DIAG LIVE v2 on-screen (mata device, pengganti logcat):
+	# st = stick (ghost-input?), anim+o = state animasi (stuck-ngangkang?),
+	# y/fl = tunneling?, fps = perf. Satu screenshot = ground truth.
 	if diag_lbl != null:
 		diag_acc += delta
 		if diag_acc >= 0.25:
 			diag_acc = 0.0
 			var y := 0.0
 			var fl := 0
+			var stx := 0.0
+			var sty := 0.0
+			var an := ""
+			var on := 0
 			if diag_player != null:
 				y = diag_player.global_position.y
 				if diag_player.has_method("is_on_floor") and diag_player.is_on_floor():
 					fl = 1
-			diag_lbl.text = "t=%05.1f y=%.2f fl=%d fps=%d" % [
-				Time.get_ticks_msec() / 1000.0, y, fl, Engine.get_frames_per_second()]
+				var mi2 = diag_player.get("move_input")
+				if mi2 != null:
+					stx = mi2.x
+					sty = mi2.y
+				var pr := diag_player.get_node_or_null("Proxy")
+				if pr != null:
+					var ca = pr.get("current_anim")
+					if ca != null:
+						an = String(ca)
+					var oo = pr.get("one_shot_active")
+					if oo != null and bool(oo):
+						on = 1
+			diag_lbl.text = "t=%05.1f y=%.2f fl=%d fps=%d st=(%.1f,%.1f) %s o=%d" % [
+				Time.get_ticks_msec() / 1000.0, y, fl, Engine.get_frames_per_second(),
+				stx, sty, an, on]
 
 
 var diag_lbl: Label = null

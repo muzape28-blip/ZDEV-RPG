@@ -27,7 +27,9 @@ func _ready() -> void:
 	mat = ShaderMaterial.new()
 	mat.shader = load("res://shaders/grass.gdshader")
 	player_node = get_node_or_null("/root/Main/Player")
-	cam_node = get_node_or_null("/root/Main/Player/CameraPivot/Camera3D")
+	cam_node = get_node_or_null("/root/Main/Player/CameraPivot/CameraArm/Camera3D") as Node3D
+	if cam_node == null:
+		cam_node = get_node_or_null("/root/Main/Player/CameraPivot/Camera3D") as Node3D
 	rebuild(density)
 
 
