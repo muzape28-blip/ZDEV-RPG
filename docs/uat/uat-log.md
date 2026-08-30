@@ -335,3 +335,19 @@ teruji di CI resmi + device. Boot lokal = boot logika, bukan boot Arissa.
 - desert.fbx + Hair.fbx/mtl = arsip tidur di ARRISA; tekstur desert
   (as_normal.png dll) BELUM ADA => desert.fbx jangan diaktifkan dulu.
 - Texture.rar TIDAK di-commit ke arena (redundan dgn png).
+
+## Entri #19 — 2026-08-31 · PAKET GABUNGAN v9+v10+tekstur (3 commit, 1 push)
+- edbdeb5 v9: freeze locomotion dipisah dari ketersediaan anim (anti-
+  skateboard permanen); face-lock kamera 0.55 s pasca-dodge samping/belakang;
+  cap strafe 3.2->2.6; joystick RADIUS 78->105 + dead-zone 0.08 + skin AAA
+  prosedural (cincin tipis, knob dua lapis, arc arah); current_anim eksplisit.
+- fef7456 v10: jubah ON + spring-bone lite Cloak1-7 (angin=-velocity ruang
+  model, gain membesar ke ujung, clamp pitch/roll, lerp 10/s = teredam;
+  Verlet penuh = upgrade path sesuai riset jubah). Saklar CLOAK_ON/HAIR_ON.
+- (commit C) tekstur DL-2PBR masuk terrain.gdshader: tiling fract() manual,
+  blend 0.6, normal perturb 0.25; guard load-gagal => blend 0.
+- CATATAN: DL-2PBR_Diffuse 14 MB => APK membengkak; VRAM via kompresi impor.
+  Pantau FPS device; bila turun, turunkan tex_blend atau downscale tekstur.
+- Repo incident #2: upload web user nimpa arena dgn orphan (7c1bcca); pulih
+  via SHA-fetch 34b6fd7 + merge; .github di-drop (cred app) => user paste
+  ulang workflows dari docs/ci/.

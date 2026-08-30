@@ -14,6 +14,12 @@ uniform float ambient_strength = 0.52;
 uniform float sun_strength = 0.62;
 uniform float detail_scale = 0.085;
 uniform float detail_strength = 0.08;
+// v10: tekstur PBR gurun (DL-2PBR) di-tiling manual via fract() —
+// tidak bergantung import-repeat; tex_blend 0 = full prosedural.
+uniform sampler2D albedo_tex;
+uniform sampler2D normal_tex;
+uniform float tex_scale = 0.05;
+uniform float tex_blend = 0.6;
 
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -34,7 +40,15 @@ void fragment() {
     base *= 1.0 + variation;
     base *= mix(vec3(0.92), vec3(1.06), COLOR.g);
 
-    float diffuse = max(dot(normalize(world_normal), normalize(sun_dir)), 0.0);
+    // v10: blend tekstur PBR (tiling manual) + perturb normal utk diffuse
+    vec2 tuv = fract(world_position.xz * tex_scale);
+    vec3 talb = texture(albedo_tex, tuv).rgb;
+    talb *= mix(vec3(0.92), vec3(1.06), COLOR.g);
+    base = mix(base, talb, tex_blend);
+    vec3 nrm = texture(normal_tex, tuv).rgb * 2.0 - 1.0;
+    vec3 wn = normalize(normalize(world_normal) + nrm.xzy * 0.25);
+
+    float diffuse = max(dot(wn, normalize(sun_dir)), 0.0);
     float lighting = ambient_strength + diffuse * sun_strength;
     ALBEDO = base * lighting;
 }

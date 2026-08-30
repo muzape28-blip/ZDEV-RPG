@@ -104,6 +104,15 @@ func _build_terrain() -> void:
 	if terrain_shader != null:
 		var shader_mat := ShaderMaterial.new()
 		shader_mat.shader = terrain_shader
+		# v10: tekstur PBR gurun user (DL-2PBR). Guard: kalau load gagal,
+		# tex_blend dipaksa 0 => tanah tetap prosedural (nggak putih/hitam).
+		var td = load("res://DL-2PBR/DL-2PBR_Diffuse.png")
+		var tn = load("res://DL-2PBR/DL-2PBR_Normal.png")
+		if td != null and tn != null:
+			shader_mat.set_shader_parameter("albedo_tex", td)
+			shader_mat.set_shader_parameter("normal_tex", tn)
+		else:
+			shader_mat.set_shader_parameter("tex_blend", 0.0)
 		mat = shader_mat
 	else:
 		var fallback := StandardMaterial3D.new()
