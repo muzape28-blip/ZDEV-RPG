@@ -4,7 +4,7 @@ extends Node3D
 # Memuat aset GLTF character (Idle, Walking, Running, Sprint)
 # Menghubungkan kecepatan joystick ke AnimationTree (BlendSpace1D) / AnimationPlayer
 
-const CLOAK_ON := true   # v10 saklar: jubah + kibar
+const CLOAK_ON := false  # v10 saklar: jubah + kibar (OFF dulu utk UAT rambut+tekstur)
 const HAIR_ON := true    # v10 saklar: rambut bertekstur
 
 var anim_player: AnimationPlayer
@@ -109,10 +109,12 @@ func _load_and_setup_character() -> void:
 	inst.scale = inst.scale * 1.1  # Arissa menjulang (permintaan UAT)
 	add_child(inst)
 	model_node = inst
-	# v10: saklar kepala — hood jubah vs rambut. Default dua-duanya ON
-	# (ponytail keluar dari bawah hood); bila UAT nampak clipping, matikan satu.
+	# v10: saklar kepala — hood jubah vs rambut. Jubah OFF = mesh Cloak
+	# disembunyikan (biar rambut kelihatan); ON = kibar spring-bone.
 	if CLOAK_ON:
 		_setup_cloak(inst)
+	else:
+		_hide_cloak(inst)
 	if HAIR_ON and char_path_used.findn("arissa") != -1:
 		_attach_hair()  # v7: rambut Sketchfab (CC-BY Marc Sawyer)
 	anim_player = _find_animation_player(inst)
@@ -234,6 +236,15 @@ func _find_mesh(node: Node) -> MeshInstance3D:
 		if f != null:
 			return f
 	return null
+
+
+# Sembunyikan mesh jubah (node "Cloak_Geo" di FBX Arissa) saat CLOAK_ON=false.
+# visible=false (bukan free) biar skin/bone refs aman.
+func _hide_cloak(root: Node) -> void:
+	for n in root.get_children():
+		_hide_cloak(n)
+	if root.name.findn("cloak") != -1 and root is MeshInstance3D:
+		(root as MeshInstance3D).visible = false
 
 
 # v10 JUBAH KIBAR — spring-bone lite teredam di rantai mixamorig:Cloak1..7
